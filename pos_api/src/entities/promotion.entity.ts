@@ -30,26 +30,18 @@ export class Promotion extends BaseEntity {
   @Column({type: 'date'})
   endDate: string;
 
-  // @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
-  // createdAt: String;
+  @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
+  createdAt: String;
 
-  // @UpdateDateColumn({ type: "datetime", default: () => "GETUTCDATE()", nullable:true, onUpdate: "GETUTCDATE()" })
-  // updatedAt?: String;
+  @UpdateDateColumn({ type: "datetime", default: () => "GETUTCDATE()", nullable:true, onUpdate: "GETUTCDATE()" })
+  updatedAt?: String;
 
-  // @DeleteDateColumn({nullable: true})
-  // deletedAt?: String;
-  
-  // @OneToOne(() => Cart, (c) => c.promotion)
-  // @JoinColumn({
-  //   name: 'promotionId',
-  //   referencedColumnName: 'promotionId'
-  // })
-  // cart: Cart;
+  @DeleteDateColumn({nullable: true})
+  deletedAt?: String;
 
   @OneToOne(() => OrderDetail, (od) => od.promotion)
   @JoinColumn({
-    name: "promotionId",
-    // referencedColumnName: 'orderDetailId',
+    name: "promotionId"
   })
   orderDetail: OrderDetail;
 

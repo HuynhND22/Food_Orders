@@ -1,5 +1,5 @@
 import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
+import { IsIn, IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
 import { Product } from './product.entity';
 import { OrderDetail } from './orderDetail.entity';
 import { User } from './user.entity';
@@ -25,20 +25,20 @@ export class Order extends BaseEntity {
   userId: number;
   // @MaxLength(11)
 
-//   @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
-//   createdAt: String;
+  @Column({type: 'nvarchar', length: 255, default: 'Tiền mặt'})
+  @IsIn(['Tiền mặt', 'Ngân hàng'])
+  payment: string;
 
-//   @UpdateDateColumn({ type: "datetime", default: () => "GETUTCDATE()", nullable:true, onUpdate: "GETUTCDATE()" })
-//   updatedAt?: String;
+  @CreateDateColumn({type: 'datetime', name: 'createdAt', default: () => "GETUTCDATE()"})
+  createdAt: String;
 
-//   @DeleteDateColumn({nullable: true})
-//   deletedAt?: String;
+  @UpdateDateColumn({ type: "datetime", default: () => "GETUTCDATE()", nullable:true, onUpdate: "GETUTCDATE()" })
+  updatedAt?: String;
+
+  @DeleteDateColumn({nullable: true})
+  deletedAt?: String;
 
   @OneToMany(() => OrderDetail, (od) => od.order)
-  // @JoinColumn({
-  //   name: 'orderId',
-  //   referencedColumnName: 'orderId',
-  // })
   orderDetails: OrderDetail[];
 
 //   @ManyToMany(

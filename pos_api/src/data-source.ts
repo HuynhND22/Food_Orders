@@ -20,6 +20,8 @@ import { Status } from './entities/status.entity';
 import { Table } from './entities/table.entity';
 import { Ward } from './entities/ward.entity';
 import { ProductSize } from './entities/productSize.entity';
+import { ResetPassword } from './entities/resetPasswor.entity';
+import { ActivateUser } from './entities/activateUser.entity';
 
 require('dotenv').config()
 
@@ -31,7 +33,7 @@ export const AppDataSource = new DataSource({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
   // entities: ['entities/**/*.entity{.ts,.js}', 'entities/**/*.schema{.ts,.js}'],
-  entities: [Cart, Status, Category, Supplier, Product, Image, Size, ProductSize, Ward, District, Province, Table, User, Promotion, PromotionDetail, Order, OrderDetail],
+  entities: [Cart, Status, Category, Supplier, Product, Image, Size, ProductSize, Ward, District, Province, Table, User, Promotion, PromotionDetail, Order, OrderDetail, ResetPassword, ActivateUser],
   synchronize: true,
   logging: true,
   extra: {

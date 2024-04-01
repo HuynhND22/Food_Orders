@@ -22,14 +22,17 @@ export class Table extends BaseEntity {
   statusId?: number;
   // @MaxLength(11)
 
-//   @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
-//   createdAt: String;
+  @Column({type: 'varchar', length:255})
+  qrCode: string;
 
-//   @UpdateDateColumn({ type: "datetime", default: () => "GETUTCDATE()", nullable:true, onUpdate: "GETUTCDATE()" })
-//   updatedAt?: String;
+  @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
+  createdAt: String;
 
-//   @DeleteDateColumn({nullable: true})
-//   deletedAt?: String;
+  @UpdateDateColumn({ type: "datetime", default: () => "GETUTCDATE()", nullable:true, onUpdate: "GETUTCDATE()" })
+  updatedAt?: String;
+
+  @DeleteDateColumn({nullable: true})
+  deletedAt?: String;
 
   @OneToOne(() => Status, (s) => s.table)
   @JoinColumn({
@@ -40,8 +43,7 @@ export class Table extends BaseEntity {
 
   @OneToMany(() => Order, (o) => o.table)
   @JoinColumn({
-    name: 'tableId',
-    // referencedColumnName: 'tableId'
+    name: 'tableId'
   })
   orders: Order[];
 

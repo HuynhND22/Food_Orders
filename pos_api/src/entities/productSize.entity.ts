@@ -11,7 +11,7 @@ export class ProductSize extends BaseEntity {
   @PrimaryGeneratedColumn({ name: 'productSizeId' })
   productSizeId: number;
 
-  @Column({ name: 'sizeId', comment: 'Classifier Size' })
+  @Column({ name: 'sizeId', comment: 'Classifier Size', nullable: true })
   sizeId: number;
   @IsNotEmpty()
 

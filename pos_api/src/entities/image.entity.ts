@@ -16,6 +16,9 @@ export class Image extends BaseEntity {
   @Column({type: 'nvarchar', length:255})
   name: string;
 
+  @Column({type: 'bit'})
+  cover: boolean;
+
   @ManyToOne(() => Product, (p) => p.images)
   @JoinColumn({
     name: 'productId',

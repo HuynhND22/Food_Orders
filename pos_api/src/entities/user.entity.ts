@@ -3,6 +3,8 @@ import { IsIn, IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
 import { Status } from './status.entity';
 import { Ward } from './ward.entity';
 import { Order } from './order.entity';
+import { ResetPassword } from './resetPasswor.entity';
+import { ActivateUser } from './activateUser.entity';
 
 
 @Entity({ name: 'Users' })
@@ -42,14 +44,14 @@ export class User extends BaseEntity {
   role: string;
   @IsIn(['quản trị viên', 'nhân viên'])
 
-//   @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
-//   createdAt: String;
+  @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
+  createdAt: String;
 
-//   @UpdateDateColumn({ type: "datetime", default: () => "GETUTCDATE()", nullable:true, onUpdate: "GETUTCDATE()" })
-//   updatedAt?: String;
+  @UpdateDateColumn({ type: "datetime", default: () => "GETUTCDATE()", nullable:true, onUpdate: "GETUTCDATE()" })
+  updatedAt?: String;
 
-//   @DeleteDateColumn({nullable: true})
-//   deletedAt?: String;
+  @DeleteDateColumn({nullable: true})
+  deletedAt?: String;
 
   @OneToOne(() => Status, (s) => s.user)
   @JoinColumn({
@@ -66,10 +68,15 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Order, (o) => o.user)
   @JoinColumn({
-    name: 'userId',
-    // referencedColumnName: 'userId'
+    name: 'userId'
   })
   orders: Order[];
+
+  @OneToOne(() => ResetPassword, (rp) => rp.user)
+  resetPassword: ResetPassword;
+
+  @OneToOne(() => ActivateUser, (rp) => rp.user)
+  activateUser: ActivateUser;
 
   // HOOKS (AUTO VALIDATE)
   @BeforeInsert()

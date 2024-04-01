@@ -27,14 +27,14 @@ export class Supplier extends BaseEntity {
   statusId: number;
   // @MaxLength(11)
 
-//   @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
-//   createdAt: String;
+  @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
+  createdAt: String;
 
-//   @UpdateDateColumn({ type: "datetime", default: () => "GETUTCDATE()", nullable:true, onUpdate: "GETUTCDATE()" })
-//   updatedAt?: String;
+  @UpdateDateColumn({ type: "datetime", default: () => "GETUTCDATE()", nullable:true, onUpdate: "GETUTCDATE()" })
+  updatedAt?: String;
 
-//   @DeleteDateColumn({nullable: true})
-//   deletedAt?: String;
+  @DeleteDateColumn({nullable: true})
+  deletedAt?: String;
 
   @OneToMany(() => Product, (p) => p.supplier)
   products: Product[];

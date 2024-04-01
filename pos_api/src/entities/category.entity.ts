@@ -19,14 +19,14 @@ export class Category extends BaseEntity {
   image?: string;
 
 
-//   @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
-//   createdAt: Date;
+  @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
+  createdAt: Date;
 
-//   @UpdateDateColumn({ type: "datetime", default: () => "GETUTCDATE()", nullable:true, onUpdate: "GETUTCDATE()" })
-//   updatedAt?: String;
+  @UpdateDateColumn({ type: "datetime", default: () => "GETUTCDATE()", nullable:true, onUpdate: "GETUTCDATE()" })
+  updatedAt?: String;
 
-//   @DeleteDateColumn({nullable: true})
-//   deletedAt?: String;
+  @DeleteDateColumn({nullable: true})
+  deletedAt?: String;
 
   @OneToMany(() => Product, (p) => p.category)
   products: Product[];
