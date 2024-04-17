@@ -1,27 +1,18 @@
-import express, { NextFunction, Request, Response } from 'express';
-
-import { AppDataSource } from '../data-source';
-import { Category } from '../entities/category.entity';
+import express from 'express';
 
 import categoryController from '../controllers/category.controller';
-
-const repository = AppDataSource.getRepository(Category);
+import validateCategory from '../middleware/validators/categoriesValidator';
 
 const router = express.Router();
 
-/* GET categories */
-router.get('/', categoryController.getAll);
-
-/* GET category by id */
-router.get('/:id', categoryController.getById);
-
-/* POST category */
-router.post('/', categoryController.create);
-
-/* PATCH category */
-router.patch('/:id', categoryController.update);
-
-/* DELETE category */
-router.delete('/:id', categoryController.softDelete);
+router.get('/all', categoryController.getAll);
+router.get('/id/:id', categoryController.getById);
+router.post('/create/', validateCategory, categoryController.create);
+router.patch('/update/:id', validateCategory, categoryController.update);
+router.delete('/remove/:id', categoryController.softDelete);
+router.get('/deleted/', categoryController.getDeleted);
+router.post('/restore/:id', categoryController.restore);
+router.delete('/delete/:id', categoryController.hardDelete);
+router.get('/check/unique', categoryController.checkNameUnique);
 
 export default router;

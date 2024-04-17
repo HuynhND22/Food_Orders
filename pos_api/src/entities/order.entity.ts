@@ -10,22 +10,18 @@ import { Status } from './status.entity';
 export class Order extends BaseEntity {
   @PrimaryGeneratedColumn({ primaryKeyConstraintName: 'orderId' })
   orderId: number;
-  // @MaxLength(11)
   @IsNotEmpty()
 
   @Column({type: 'int'})
   tableId: number;
-  // @MaxLength(11)
 
-//   @Column({type: 'int'})
-//   statusId: number;
-  // @MaxLength(11)
+  @Column({type: 'int'})
+  statusId: number;
 
   @Column({type: 'int'})
   userId: number;
-  // @MaxLength(11)
 
-  @Column({type: 'nvarchar', length: 255, default: 'Tiền mặt'})
+  @Column({type: 'nvarchar', length: 255, default: ["N'Tiền mặt'"]})
   @IsIn(['Tiền mặt', 'Ngân hàng'])
   payment: string;
 
@@ -72,7 +68,7 @@ export class Order extends BaseEntity {
     })
     table: Table;
 
-    @OneToOne(() => Status, (s) => s.order)
+    @ManyToOne(() => Status, (s) => s.orders)
     @JoinColumn({
       name: "statusId",
       referencedColumnName: 'statusId'

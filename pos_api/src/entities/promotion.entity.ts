@@ -10,25 +10,28 @@ import { PromotionDetail } from './promotionDetail.entity';
 export class Promotion extends BaseEntity {
   @PrimaryGeneratedColumn({ name: 'promotionId' })
   promotionId: number;
-  // @MaxLength(11)
   @IsNotEmpty()
 
-  @Column({type: 'nvarchar', length:255})
+  @Column({type: 'nvarchar', length:255, unique: true})
   name: string;
 
   @Column({type: 'int'})
+  @Check('"limit" > 0')
   limit: number;
-  @MaxLength(5)
 
   @Column({type: 'int'})
+  @Check('"price" > 0')
   price: number;
-  @MaxLength(11)
 
-  @Column({type: 'date'})
+  @Column({type: 'date', default: () => "GETUTCDATE()"})
   startDate: string;
 
-  @Column({type: 'date'})
+  @Column({type: 'date', default: () => "GETUTCDATE()"})
+  @Check(`"endDate" >= "startDate"`)
   endDate: string;
+
+  @Column({type: 'int'})
+  statusId: string;
 
   @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
   createdAt: String;
@@ -39,13 +42,13 @@ export class Promotion extends BaseEntity {
   @DeleteDateColumn({nullable: true})
   deletedAt?: String;
 
-  @OneToOne(() => OrderDetail, (od) => od.promotion)
+  @OneToMany(() => OrderDetail, (od) => od.promotion)
   @JoinColumn({
     name: "promotionId"
   })
-  orderDetail: OrderDetail;
+  orderDetails: OrderDetail[];
 
-  @OneToOne(() => Status, (s) => s.promotion)
+  @ManyToOne(() => Status, (s) => s.promotions)
   @JoinColumn({
     name: "statusId",
     referencedColumnName: 'statusId'
@@ -55,7 +58,7 @@ export class Promotion extends BaseEntity {
   @OneToMany(() => PromotionDetail, (pd) => pd.promotions)
   promotionDetail: PromotionDetail;
 
-  @OneToOne(() => Cart, (c) => c.promotion)
+  @OneToMany(() => Cart, (c) => c.promotions)
     cart: Cart;
 
   // HOOKS (AUTO VALIDATE)

@@ -1,12 +1,11 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, Entity, JoinColumn, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
 import {District } from './district.entity';
 
 @Entity({ name: 'Provinces' })
 export class Province extends BaseEntity {
-  @PrimaryGeneratedColumn({ primaryKeyConstraintName: 'provinceId' })
+  @PrimaryColumn({ primaryKeyConstraintName: 'provinceId' })
   provinceId: number;
-  // @MaxLength(11)
   @IsNotEmpty()
 
   @Column({type: 'nvarchar', length: 255 })
@@ -14,8 +13,7 @@ export class Province extends BaseEntity {
 
   @OneToMany(() => District, (d) => d.province)
   @JoinColumn({
-    name: 'provinceId',
-    // referencedColumnName: 'provinceId',
+    name: 'provinceId'
   })
   districts: District[];
 

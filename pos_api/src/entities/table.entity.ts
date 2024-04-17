@@ -1,4 +1,4 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
 import { Status } from './status.entity';
 import { Cart } from './cart.entity';
@@ -8,14 +8,13 @@ import { Order } from './order.entity';
 export class Table extends BaseEntity {
   @PrimaryGeneratedColumn({ primaryKeyConstraintName: 'tableId' })
   tableId: number;
-  // @MaxLength(11)
   @IsNotEmpty()
 
-  @Column({type: 'int'})
+  @Column({type: 'int', default: 2})
   seat: number;
-  @MaxLength(2)
+  
 
-  @Column({type: 'nvarchar', length:255})
+  @Column({type: 'nvarchar', length:255, unique: true})
   name: string;
 
   @Column({type: 'int'})
@@ -34,7 +33,7 @@ export class Table extends BaseEntity {
   @DeleteDateColumn({nullable: true})
   deletedAt?: String;
 
-  @OneToOne(() => Status, (s) => s.table)
+  @ManyToOne(() => Status, (s) => s.tables)
   @JoinColumn({
     name: "statusId",
     referencedColumnName: 'statusId'
@@ -47,8 +46,8 @@ export class Table extends BaseEntity {
   })
   orders: Order[];
 
-  @OneToOne(() => Cart, (s) => s.table)
-  cart: Cart;
+  @ManyToOne(() => Cart, (s) => s.table)
+  carts: Cart[];
 
   // HOOKS (AUTO VALIDATE)
   @BeforeInsert()

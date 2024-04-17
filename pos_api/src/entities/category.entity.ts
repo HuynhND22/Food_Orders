@@ -1,5 +1,5 @@
 import { BaseEntity, BeforeInsert, BeforeUpdate, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
+import { IsNotEmpty, validateOrReject } from 'class-validator';
 import { Product } from './product.entity';
 
 @Entity({ name: 'Categories' })
@@ -14,10 +14,6 @@ export class Category extends BaseEntity {
 
   @Column({type: 'nvarchar', length: 255, nullable: true })
   description?: string;
-
-  @Column({type: 'nvarchar', length: 255, nullable: true})
-  image?: string;
-
 
   @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
   createdAt: Date;

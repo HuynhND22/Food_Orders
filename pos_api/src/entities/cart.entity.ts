@@ -1,39 +1,39 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { IsNotEmpty, MaxLength, maxLength, validateOrReject } from 'class-validator';
-import { Product } from './product.entity';
 import { Table } from './table.entity';
 import { Promotion } from './promotion.entity';
+import { ProductSize } from './productSize.entity';
 
 @Entity({ name: 'Carts' })
 export class Cart extends BaseEntity {
-  @PrimaryColumn({ name: 'tableId'})
+  @PrimaryGeneratedColumn({type: 'int'})
+  cartId: number;
+  
+  @Column({ name: 'tableId'})
   tableId: number;
-  @MaxLength(11)
   @IsNotEmpty()
 
-  @Column({type: 'int'})
-  productId: number;
-  // @MaxLength(11)
+  @Column({type: 'int', nullable:true})
+  productSizeId: number;
 
-  @Column({type: 'int'})
+  @Column({type: 'int', nullable:true})
   promotionId: number;
-  // @MaxLength(11)
 
   @Column({type: 'int'})
+  @Check('"quantity" > 0')
   quantity: number;
-  @MaxLength(2)
 
-  @OneToOne(() => Table, (t) => t.cart)
+  @OneToMany(() => Table, (t) => t.carts)
   @JoinColumn({name: 'tableId', referencedColumnName: 'tableId'})
   table: Table;
 
-  @OneToOne(() => Product, (p) => p.cart)
-  @JoinColumn({name: 'productId'})
-  product: Product;
+  @ManyToOne(() => ProductSize, (p) => p.cart)
+  @JoinColumn({name: 'productSizeId'})
+  productSizes: ProductSize[];
 
-  @OneToOne(() => Promotion, (pr) => pr.cart)
+  @ManyToOne(() => Promotion, (pr) => pr.cart)
   @JoinColumn({name: 'promotionId'})
-  promotion: Promotion;
+  promotions: Promotion[];
 
   // HOOKS (AUTO VALIDATE)
   @BeforeInsert()

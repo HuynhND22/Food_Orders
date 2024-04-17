@@ -1,4 +1,4 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
 import { Product } from './product.entity';
 import { Ward } from './ward.entity';
@@ -18,6 +18,9 @@ export class Supplier extends BaseEntity {
   
   @Column({unique: true ,type: 'nvarchar', length: 15, nullable: true })
   phoneNumber?: string;
+
+  @Column({type: 'nvarchar', length: 255, nullable: true })
+  address: string;
 
   @Column({type: 'int', nullable: true})
   wardId?: number;
@@ -39,7 +42,7 @@ export class Supplier extends BaseEntity {
   @OneToMany(() => Product, (p) => p.supplier)
   products: Product[];
 
-  @OneToOne(() => Ward, (w) => w.supplier)
+  @ManyToOne(() => Ward, (w) => w.suppliers)
   @JoinColumn({
     name: 'wardId',
     referencedColumnName: 'wardId'

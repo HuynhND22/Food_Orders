@@ -7,18 +7,17 @@ import { ProductSize } from './productSize.entity';
 export class PromotionDetail extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int' })
   promotionDetailId: number;
-  // @MaxLength(11)
   @IsNotEmpty()
 
   @Column({ type: 'int' })
   promotionId: number;
 
   @Column({type: 'int'})
-  productId: number;
+  productSizeId: number;
 
   @Column({type: 'int'})
+  @Check('"quantity" > 0')
   quantity: number;
-  @MaxLength(11)
 
   @Column({type: 'nvarchar', length: 255})
   description: string;

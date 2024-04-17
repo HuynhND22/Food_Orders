@@ -1,4 +1,4 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
 import { District } from './district.entity';
 import { User } from './user.entity';
@@ -6,9 +6,8 @@ import { Supplier } from './supplier.entity';
 
 @Entity({ name: 'Wards' })
 export class Ward extends BaseEntity {
-  @PrimaryGeneratedColumn({ primaryKeyConstraintName: 'wardId' })
+  @PrimaryColumn({ primaryKeyConstraintName: 'wardId' })
   wardId: number;
-  // @MaxLength(11)
   @IsNotEmpty()
 
   @Column({type: 'nvarchar', length: 255 })
@@ -16,20 +15,18 @@ export class Ward extends BaseEntity {
 
   @Column({type: 'int'})
   districtId: number;
-  // @MaxLength(11)
 
   @ManyToOne(() => District, (d) => d.wards)
   @JoinColumn({
-    name: 'districtId',
-    // referencedColumnName: 'districtId'
+    name: 'districtId'
   })
   district: District;
 
-  @OneToOne(() => User, (u) => u.ward)
-  user: User;
+  @OneToMany(() => User, (u) => u.ward)
+  users: User[];
 
-  @OneToOne(() => Supplier, (s) => s.ward)
-  supplier: Supplier;
+  @OneToMany(() => Supplier, (s) => s.ward)
+  suppliers: Supplier[];
 
   // HOOKS (AUTO VALIDATE)
   @BeforeInsert()

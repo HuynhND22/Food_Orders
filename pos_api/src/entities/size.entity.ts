@@ -12,7 +12,7 @@ export class Size extends BaseEntity {
   sizeId: number;
   @IsNotEmpty()
 
-  @Column({type: 'nvarchar', length: 255})
+  @Column({type: 'nvarchar', length: 255, unique: true})
   name: string;
 
   @OneToMany(() => ProductSize, (ps) => ps.size)

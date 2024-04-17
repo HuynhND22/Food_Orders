@@ -9,35 +9,32 @@ import { ProductSize } from './productSize.entity';
 export class OrderDetail extends BaseEntity {
   @PrimaryGeneratedColumn({ primaryKeyConstraintName: 'orderDetailId' })
   orderDetailId: number;
-  // @MaxLength(11)
   @IsNotEmpty()
 
   @Column({type: 'int'})
   orderId: number;
-  // @MaxLength(11)
 
   @Column({type: 'int', nullable: true})
   productSizeId?: number;
-  // @MaxLength(11)
 
   @Column({type: 'int', nullable: true})
   promotionId?: number;
   @MaxLength(11)
 
-  @Column({type: 'int'})
+  @Column({type: 'int', default: 1})
+  @Check('"quantity" > 0')
   quantity: number;
-  @MaxLength(2)
 
   @Column({type: 'nvarchar', length:255, nullable: true})
   description?: string;
 
   @Column({type: 'int'})
+  @Check('"price" > 0')
   price: number;
-  @MaxLength(11)
 
-  @Column({type: 'int'})
+  @Column({type: 'int', default: 0})
+  @Check(`"discount" >= 0 AND "discount" <= 50`)
   discount: number;
-  @MaxLength(3)
 
   @ManyToOne(() => Order, (o) => o.orderDetails)
   @JoinColumn({
@@ -53,7 +50,7 @@ export class OrderDetail extends BaseEntity {
   })
   productSizes: ProductSize[];
 
-  @OneToOne(() => Promotion, (pr) => pr.orderDetail)
+  @ManyToOne(() => Promotion, (pr) => pr.orderDetails)
   promotion: Promotion;
 
   // HOOKS (AUTO VALIDATE)

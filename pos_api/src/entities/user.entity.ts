@@ -1,4 +1,4 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn, VirtualColumn } from 'typeorm';
+import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn, VirtualColumn } from 'typeorm';
 import { IsIn, IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
 import { Status } from './status.entity';
 import { Ward } from './ward.entity';
@@ -23,7 +23,8 @@ export class User extends BaseEntity {
   @VirtualColumn({ query: () => `SELECT CONCAT(firstName, ' ', lastName) AS fullName FROM users;` })
   fullName: string;
 
-  @Column({type: 'nvarchar', length: 11})
+  @Column({type: 'nvarchar', length: 11, default: 'Nam'})
+  @IsIn(['Nam', 'Nữ'])
   gender: string;
   
   @Column({unique: true ,type: 'nvarchar', length: 255 })
@@ -31,6 +32,9 @@ export class User extends BaseEntity {
   
   @Column({unique: true ,type: 'nvarchar', length: 15, nullable: true })
   phoneNumber?: string;
+
+  @Column({type: 'nvarchar', length: 255, nullable: true })
+  address: string;
 
   @Column({type: 'int', nullable: true})
   wardId?: number;
@@ -40,9 +44,9 @@ export class User extends BaseEntity {
   statusId: number;
   // @MaxLength(11)
 
-  @Column({type: 'nvarchar', length: 11, default: 'nhân viên'})
+  @Column({type: 'nvarchar', length: 11, default: ["N'Nhân viên'"]})
+  @IsIn(['Quản trị viên', 'Nhân viên'])
   role: string;
-  @IsIn(['quản trị viên', 'nhân viên'])
 
   @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
   createdAt: String;
@@ -53,14 +57,14 @@ export class User extends BaseEntity {
   @DeleteDateColumn({nullable: true})
   deletedAt?: String;
 
-  @OneToOne(() => Status, (s) => s.user)
+  @ManyToOne(() => Status, (s) => s.users)
   @JoinColumn({
     name: "statusId",
     referencedColumnName: 'statusId'
   })
   status: Status;
 
-  @OneToOne(() => Ward, (w) => w.user)
+  @ManyToOne(() => Ward, (w) => w.users)
   @JoinColumn({
     name: 'wardId',
   })

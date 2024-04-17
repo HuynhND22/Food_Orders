@@ -1,4 +1,4 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
 import { User } from './user.entity';
 import { Table } from './table.entity';
@@ -8,28 +8,30 @@ import { Promotion } from './promotion.entity';
 
 @Entity({ name: 'States' })
 export class Status extends BaseEntity {
-  @PrimaryGeneratedColumn({ primaryKeyConstraintName: 'statusId' })
-  statusId: number;
-  // @MaxLength(11)
-  @IsNotEmpty()
+  // @PrimaryGeneratedColumn({ primaryKeyConstraintName: 'statusId' })
+  // statusId: number;
+  // @IsNotEmpty()
 
-  @Column({type: 'nvarchar', length:255})
+  @PrimaryColumn({ type: 'int' })
+  statusId: number;
+
+  @Column({type: 'nvarchar', length:255, unique: true})
   name: string;
 
-  @OneToOne(() => User, (u) => u.status)
-  user: User;
+  @OneToMany(() => User, (u) => u.status)
+  users: User[];
 
-  @OneToOne(()=> Table, (t) => t.status)
-  table: Table;
+  @OneToMany(()=> Table, (t) => t.status)
+  tables: Table[];
   
-  @OneToOne(() => Product, (p) => p.status)
-  product: Product;
+  @OneToMany(() => Product, (p) => p.status)
+  products: Product[];
 
-  @OneToOne(() => Order, (o) => o.status)
-  order: Order;
+  @OneToMany(() => Order, (o) => o.status)
+  orders: Order[];
 
-  @OneToOne(() => Promotion, (p) => p.status)
-  promotion: Promotion;
+  @OneToMany(() => Promotion, (p) => p.status)
+  promotions: Promotion[];
 
   // HOOKS (AUTO VALIDATE)
   @BeforeInsert()

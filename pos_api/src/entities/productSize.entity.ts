@@ -4,6 +4,7 @@ import { Product } from './product.entity';
 import { PromotionDetail } from './promotionDetail.entity';
 import { Size } from './size.entity';
 import { OrderDetail } from './orderDetail.entity';
+import { Cart } from './cart.entity';
 
 @Entity({ name: 'ProductSizes' })
 export class ProductSize extends BaseEntity {
@@ -19,11 +20,12 @@ export class ProductSize extends BaseEntity {
   productId: number;
 
   @Column({type: 'int'})
+  @Check('"price" > 0')
   price: number;
 
   @Column({type: 'int'})
+  @Check('"stock" >= 0')
   stock: number;
-  @MaxLength(11)
 
   @ManyToOne(() => Product, (p) => p.productSizes)
   @JoinColumn({
@@ -37,14 +39,13 @@ export class ProductSize extends BaseEntity {
   })
   size: Size;
 
+  @OneToMany(() => Cart, (c) => c.productSizes)
+  cart: Cart;
+
   @OneToMany(() => PromotionDetail, (pmd) => pmd.productSizes)
   promotionDetail: PromotionDetail;
 
   @OneToMany(() => OrderDetail, (od) => od.productSizes)
-  // @JoinColumn({
-  //   name: 'productSizeId',
-  //   referencedColumnName: 'productSizeId'
-  // })
   orderDetail: OrderDetail;
 
   // HOOKS (AUTO VALIDATE)

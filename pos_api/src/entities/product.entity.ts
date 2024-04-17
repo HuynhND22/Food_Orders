@@ -25,12 +25,12 @@ export class Product extends BaseEntity {
   supplierId: number;
   // @MaxLength(11)
 
-  @Column({type: 'nvarchar', length: 255})
+  @Column({type: 'nvarchar', length: 255, unique: true})
   name: string;
   
-  @Column({type: 'int'})
+  @Column({type: 'int', default: 0})
+  @Check(`"discount" >= 0 AND "discount" <= 50`)
   discount: number;
-  @MaxLength(3)
   
   @Column({type: 'nvarchar', length:255, nullable: true})
   description?: string;
@@ -83,10 +83,7 @@ export class Product extends BaseEntity {
   //   })
     // orders: Order[];
 
-    @OneToOne(() => Cart, (c) => c.product)
-    cart: Cart;
-
-    @OneToOne(() => Status, (c) => c.product)
+    @ManyToOne(() => Status, (c) => c.products)
     @JoinColumn({
       name: "statusId",
       referencedColumnName: 'statusId'

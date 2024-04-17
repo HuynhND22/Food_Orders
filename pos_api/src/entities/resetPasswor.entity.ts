@@ -1,4 +1,4 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
 import { User } from './user.entity';
 
@@ -10,6 +10,9 @@ export class ResetPassword extends BaseEntity {
 
   @Column({type: 'varchar', length: 255})
   token: string;
+
+  @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
+  createdAt: Date;
 
   @OneToOne(() => User, (u) => u.resetPassword)
   @JoinColumn({

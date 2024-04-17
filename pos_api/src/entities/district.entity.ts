@@ -1,13 +1,12 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
 import { Ward } from './ward.entity';
 import { Province } from './province.entity';
 
 @Entity({ name: 'Districts' })
 export class District extends BaseEntity {
-  @PrimaryGeneratedColumn({ primaryKeyConstraintName: 'districtId' })
+  @PrimaryColumn({ primaryKeyConstraintName: 'districtId' })
   districtId: number;
-  // @MaxLength(11)
   @IsNotEmpty()
 
   @Column({type: 'nvarchar', length: 255 })
@@ -15,19 +14,16 @@ export class District extends BaseEntity {
 
   @Column({type: 'int'})
   provinceId: number;
-  // @MaxLength(11)
 
   @OneToMany(() => Ward, (w) => w.district)
   @JoinColumn({
-    name: 'districtId',
-    // referencedColumnName: 'districtId'
+    name: 'districtId'
   })
   wards: Ward[];
 
   @ManyToOne(()=> Province, (p) => p.districts)
   @JoinColumn({
-    name: 'provinceId',
-    // referencedColumnName: 'provinceId'
+    name: 'provinceId'
   })
   province: Province;
   
