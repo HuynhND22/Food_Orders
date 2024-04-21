@@ -103,7 +103,7 @@ const softDelete = async (req: Request, res: Response, next: any) => {
 
 const restore = async (req: Request, res: Response, next: any) => {
     try {
-      const category = await repository.findOne({ withDeleted: true, where: { categoryId: parseInt(req.params.id) }});
+      const category = await repository.findOne({ withDeleted: true, where: { categoryId: parseInt(req.params.id), deletedAt: Not(IsNull()) }});
       if (!category) {
         return res.status(410).json({ error: 'Not found' });
       }
@@ -129,21 +129,19 @@ const hardDelete = async (req: Request, res: Response) => {
   }
 }
 
-const checkNameUnique = async (req:Request, res:Response) => {
-  if(!!req.query.oldName && req.query.oldName == req.query.name) {
+const checkCategoryUnique = async (req:Request, res:Response) => {
+  const {value, ignore, field} = req.query;
+  if(ignore && ignore == value) {
     return res.sendStatus(200)
   }
 
-  const check = await checkUnique(Category, 'name', req.query.name);
   try {
-    if(!check) {
-      return res.sendStatus(400)
-    }
-    res.sendStatus(200)
+    const check = await checkUnique(Category, `${field}`, value);
+    check ? res.sendStatus(200) : res.sendStatus(400)
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+      console.log(error);
+      res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
-export default {getAll, getById, getDeleted, create, update, softDelete, restore, hardDelete, checkNameUnique}
+export default {getAll, getById, getDeleted, create, update, softDelete, restore, hardDelete, checkCategoryUnique}

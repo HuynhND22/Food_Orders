@@ -23,6 +23,8 @@ import { ProductSize } from './entities/productSize.entity';
 import { ResetPassword } from './entities/resetPasswor.entity';
 import { ActivateUser } from './entities/activateUser.entity';
 
+import { checkCartsUnique } from './migrations/triggers/checkCartsUnique';
+
 export const AppDataSource = new DataSource({
   type: 'mssql',
   host: process.env.DB_HOST || 'localhost',
@@ -52,8 +54,11 @@ export const AppDataSource = new DataSource({
     ResetPassword, 
     ActivateUser
   ],
-  synchronize: true,
-  logging: true,
+  migrations: [
+    checkCartsUnique
+  ],
+  synchronize: false,
+  logging: false,
   extra: {
     trustServerCertificate: true,
   }

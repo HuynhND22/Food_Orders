@@ -1,9 +1,10 @@
-import express, { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { AppDataSource } from '../data-source';
 import { IsNull, Not } from 'typeorm';
 import { Table } from '../entities/table.entity';
 import { convertToSimpleString } from '../helpers/convertToSimpleString';
 import {unlink} from 'fs';
+import checkUnique from '../helpers/checkUnique';
 
 const QRCode = require('qrcode');
 
@@ -60,7 +61,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         return res.status(201).json(table);
     } catch (error: any) {
         if(error.number === 2627) {
-            return res.status(400).json({ error: 'Table already exists' });
+            return res.status(400).json({ error: 'Table name already exists' });
         }
         console.error(error);
         return res.status(500).json({ error: 'Internal server error' });
@@ -134,7 +135,7 @@ const getDeleted = async (req: Request, res: Response, next: NextFunction) => {
 
 const restore = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const table = await repository.findOne({ withDeleted: true, where: {tableId: parseInt(req.params.id)} });
+        const table = await repository.findOne({ withDeleted: true, where: {tableId: parseInt(req.params.id), deletedAt: Not(IsNull()) } });
         if (!table) {
             return res.status(410).json({ error: 'Not found' });
         }
@@ -147,4 +148,35 @@ const restore = async (req: Request, res: Response, next: NextFunction) => {
 
 }
 
-export default {getAll, getById, create, update, softDelete, getDeleted, restore}
+const hardDelete = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const table = await repository.findOne({ withDeleted: true, where: {tableId: parseInt(req.params.id), deletedAt: Not(IsNull())} });
+        if (!table) {
+            return res.status(410).json({ error: 'Not found' });
+        }
+        await repository.delete({ tableId: parseInt(req.params.id) });
+        return res.sendStatus(200);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
+
+const checkTableUnique = async (req:Request, res:Response) => {
+    const {value, ignore, field} = req.query;
+  
+    if(ignore && ignore == value) {
+      return res.sendStatus(200)
+    }
+    
+    try {
+        const check = await checkUnique(Table, `${field}`, value);
+        check ? res.sendStatus(200) : res.sendStatus(400)
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
+
+export default {getAll, getById, create, update, softDelete, getDeleted, restore, hardDelete, checkTableUnique}

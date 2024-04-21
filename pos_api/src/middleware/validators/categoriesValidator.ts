@@ -3,8 +3,6 @@ import { Request, Response, NextFunction } from "express";
 
 const categorySchema = object().shape({
     name: string().required('Name must be required'),
-    seat: number().required('Seat must be required').max(50, 'Maximun of seat is 50'),
-    statusId: number().required('StatusId must be required'),
     description: string().notRequired()
   });
 

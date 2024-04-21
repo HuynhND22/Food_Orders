@@ -13,6 +13,6 @@ router.delete('/remove/:id', categoryController.softDelete);
 router.get('/deleted/', categoryController.getDeleted);
 router.post('/restore/:id', categoryController.restore);
 router.delete('/delete/:id', categoryController.hardDelete);
-router.get('/check/unique', categoryController.checkNameUnique);
+router.get('/check/unique', categoryController.checkCategoryUnique);
 
 export default router;
