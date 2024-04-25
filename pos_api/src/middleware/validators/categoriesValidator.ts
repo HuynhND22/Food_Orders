@@ -2,7 +2,7 @@ import {number, object, string} from 'yup';
 import { Request, Response, NextFunction } from "express";
 
 const categorySchema = object().shape({
-    name: string().required('Name must be required'),
+    name: string().required('Name must be required').max(255),
     seat: number().required('Seat must be required').max(50, 'Maximun of seat is 50'),
     statusId: number().required('StatusId must be required'),
     description: string().notRequired()

@@ -27,8 +27,8 @@ export const AppDataSource = new DataSource({
   type: 'mssql',
   host: process.env.DB_HOST || 'localhost',
   port: Number(process.env.DB_PORT),
-  username: process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
+  username: 'test',
+  password: "123abc",
   database: process.env.DB_DATABASE,
   // entities: ['entities/**/*.entity{.ts,.js}', 'entities/**/*.schema{.ts,.js}'],
   entities: [

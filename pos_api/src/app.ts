@@ -8,6 +8,7 @@ import { AppDataSource } from './data-source';
 import indexRouter from './routes/index';
 import categoriesRouter from './routes/categories';
 import tablesRouter from './routes/tables';
+import supplierRouter from './routes/suppliers';
 // import suppliersRouter from './routes/suppliers';
 // import productsRouter from './routes/products';
 // import ordersRouter from './routes/orders';
@@ -30,7 +31,8 @@ AppDataSource.initialize().then(async () => {
   app.use('/api/', indexRouter);
   app.use('/categories', categoriesRouter);
   app.use('/tables', tablesRouter);
-  // app.use('/suppliers', suppliersRouter);
+   app.use('/suppliers', supplierRouter);
+
   // app.use('/orders', ordersRouter);
   // app.use('/advanced', advancedRouter);
 

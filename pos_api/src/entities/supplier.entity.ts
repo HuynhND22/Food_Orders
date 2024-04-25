@@ -16,14 +16,17 @@ export class Supplier extends BaseEntity {
   @Column({unique: true ,type: 'nvarchar', length: 255 })
   email: string;
   
-  @Column({unique: true ,type: 'nvarchar', length: 15, nullable: true })
-  phoneNumber?: string;
+  @Column({ unique: true, type: 'varchar', length: 15, nullable: true })
+  phoneNumber?: string; // Sử dụng kiểu dữ liệu string thay vì number
+  
+  
 
   @Column({type: 'nvarchar', length: 255, nullable: true })
   address: string;
 
-  @Column({type: 'int', nullable: true})
-  wardId?: number;
+@Column({type: 'int', nullable: true})
+wardId?: number;
+
   // @MaxLength(11)
 
   @Column({type: 'int'})
