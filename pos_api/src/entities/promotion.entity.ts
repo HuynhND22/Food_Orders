@@ -43,9 +43,6 @@ export class Promotion extends BaseEntity {
   deletedAt?: String;
 
   @OneToMany(() => OrderDetail, (od) => od.promotion)
-  @JoinColumn({
-    name: "promotionId"
-  })
   orderDetails: OrderDetail[];
 
   @ManyToOne(() => Status, (s) => s.promotions)
@@ -55,11 +52,11 @@ export class Promotion extends BaseEntity {
   })
   status: Status;
 
-  @OneToMany(() => PromotionDetail, (pd) => pd.promotions)
-  promotionDetail: PromotionDetail;
+  @OneToMany(() => PromotionDetail, (pd) => pd.promotion)
+  promotionDetails: PromotionDetail[];
 
-  @OneToMany(() => Cart, (c) => c.promotions)
-    cart: Cart;
+  @OneToMany(() => Cart, (c) => c.promotion)
+    carts: Cart[];
 
   // HOOKS (AUTO VALIDATE)
   @BeforeInsert()

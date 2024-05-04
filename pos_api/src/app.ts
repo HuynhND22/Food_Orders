@@ -11,9 +11,11 @@ import tablesRouter from './routes/tables';
 import userRouter from './routes/users';
 import cartRouter from './routes/carts';
 import addressRouter from './routes/address';
+import promotionRouter from './routes/promotions';
+import paymentRouter from './routes/payments';
 // import suppliersRouter from './routes/suppliers';
 // import productsRouter from './routes/products';
-// import ordersRouter from './routes/orders';
+import ordersRouter from './routes/orders';
 // import advancedRouter from './routes/advanced';
 
 const app: Express = express();
@@ -36,8 +38,10 @@ AppDataSource.initialize().then(async () => {
   app.use('/users', userRouter);
   app.use('/carts', cartRouter);
   app.use('/address', addressRouter);
+  app.use('/promotions', promotionRouter);
+  app.use('/payments', paymentRouter);
   // app.use('/suppliers', suppliersRouter);
-  // app.use('/orders', ordersRouter);
+  app.use('/orders', ordersRouter);
   // app.use('/advanced', advancedRouter);
 
   // catch 404 and forward to error handler

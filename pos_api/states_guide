@@ -31,4 +31,3 @@ INSERT INTO states (statusId, name) VALUES (42, N'Khoá');
 INSERT INTO states (statusId, name) VALUES (50, N'Ngừng hoạt động');
 INSERT INTO states (statusId, name) VALUES (51, N'Đang hoạt động');
 INSERT INTO states (statusId, name) VALUES (52, N'Hết hạn');
-

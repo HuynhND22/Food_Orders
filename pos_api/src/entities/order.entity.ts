@@ -15,10 +15,10 @@ export class Order extends BaseEntity {
   @Column({type: 'int'})
   tableId: number;
 
-  @Column({type: 'int'})
+  @Column({type: 'int', default: 10})
   statusId: number;
 
-  @Column({type: 'int'})
+  @Column({type: 'int', nullable: true})
   userId: number;
 
   @Column({type: 'nvarchar', length: 255, default: ["N'Tiền mặt'"]})

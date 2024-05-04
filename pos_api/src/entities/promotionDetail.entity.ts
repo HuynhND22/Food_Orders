@@ -9,31 +9,30 @@ export class PromotionDetail extends BaseEntity {
   promotionDetailId: number;
   @IsNotEmpty()
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int' , nullable: true})
   promotionId: number;
 
-  @Column({type: 'int'})
+  @Column({type: 'int', nullable: true})
   productSizeId: number;
 
   @Column({type: 'int'})
   @Check('"quantity" > 0')
   quantity: number;
 
-  @Column({type: 'nvarchar', length: 255})
+  @Column({type: 'nvarchar', length: 255, nullable: true})
   description: string;
-  
 
-  @ManyToOne(() => ProductSize, (ps) => ps.promotionDetail)
+  @ManyToOne(() => ProductSize, (ps) => ps.promotionDetails)
   @JoinColumn({
     name: 'productSizeId',
   })
-  productSizes: ProductSize[];
+  productSize: ProductSize;
 
-  @ManyToOne(() => Promotion, (pm) => pm.promotionDetail)
+  @ManyToOne(() => Promotion, (pm) => pm.promotionDetails)
   @JoinColumn({
     name: 'promotionId'
   })
-  promotions: Promotion[];
+  promotion: Promotion;
 
  
 

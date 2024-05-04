@@ -5,7 +5,9 @@ import { Table } from '../entities/table.entity';
 import { convertToSimpleString } from '../helpers/convertToSimpleString';
 import {unlink} from 'fs';
 import checkUnique from '../helpers/checkUnique';
+import { handleUniqueError } from '../helpers/handleUniqueError';
 
+const base64Url = require('base64-url');
 const QRCode = require('qrcode');
 
 const repository = AppDataSource.getRepository(Table);
@@ -44,13 +46,15 @@ const getById = async (req: Request, res: Response, next: NextFunction) => {
 const create = async (req: Request, res: Response, next: NextFunction) => {
     try {
         let data = req.body;
-        
+        let simpleName = convertToSimpleString(req.body.name);
         const table = new Table();
-        data['qrCode'] =  `./public/upload/tables/${convertToSimpleString(req.body.name)}.png`;
+        data['qrCode'] =  `./public/upload/tables/${simpleName}.png`;
+        data['urlCode'] =  base64Url.encode(simpleName);
+
         Object.assign(table, data);
         await repository.save(table);
 
-        await QRCode.toFile(`./public/upload/tables/${convertToSimpleString(req.body.name)}.png`, process.env.HOST_CLIENT + `/tables/${convertToSimpleString(req.body.name)}`, {
+        await QRCode.toFile(`./public/upload/tables/${simpleName}.png`, process.env.HOST_CLIENT + `/tables/${data['urlCode']}`, {
             errorCorrectionLevel: 'H'
           }, function(err:any) {
             if (err) throw err;
@@ -60,8 +64,9 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
         return res.status(201).json(table);
     } catch (error: any) {
-        if(error.number === 2627) {
-            return res.status(400).json({ error: 'Table name already exists' });
+        if(error.number == 2627) {
+            const message = handleUniqueError(error);
+            return res.status(400).json({ error: message });
         }
         console.error(error);
         return res.status(500).json({ error: 'Internal server error' });
@@ -76,11 +81,13 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
         }
 
         let data = req.body;
+        let simpleName = convertToSimpleString(req.body.name);
 
         if(req.body.name) {
             try {
-                data['qrCode'] =  `./public/upload/tables/${convertToSimpleString(req.body.name)}.png`;
-                await QRCode.toFile(`./public/upload/tables/${convertToSimpleString(req.body.name)}.png`, process.env.HOST_CLIENT + `/tables/${convertToSimpleString(req.body.name)}`, {
+                data['qrCode'] =  `./public/upload/tables/${simpleName}.png`;
+                data['urlCode'] =  base64Url.encode(simpleName);
+                await QRCode.toFile(`./public/upload/tables/${simpleName}.png`, process.env.HOST_CLIENT + `/tables/${data['urlCode']}`, {
                     errorCorrectionLevel: 'H'
                   }, function(err:any) {
                     if (err) throw err;
@@ -100,7 +107,11 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
         Object.assign(table, data);
         await repository.save(table);
         return res.json(table);
-    } catch (error) {
+    } catch (error:any) {
+        if(error.number == 2627) {
+            const message = handleUniqueError(error);
+            return res.status(400).json({ error: message });
+        }
         console.error(error);
         return res.status(500).json({ error: 'Internal server error' });
     }

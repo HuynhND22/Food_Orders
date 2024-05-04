@@ -23,6 +23,10 @@ export class ProductSize extends BaseEntity {
   @Check('"price" > 0')
   price: number;
 
+  @Column({type: 'int', default: 0})
+  @Check(`"discount" >= 0 AND "discount" <= 50`)
+  discount: number;
+
   @Column({type: 'int'})
   @Check('"stock" >= 0')
   stock: number;
@@ -42,11 +46,11 @@ export class ProductSize extends BaseEntity {
   @OneToMany(() => Cart, (c) => c.productSizes)
   cart: Cart;
 
-  @OneToMany(() => PromotionDetail, (pmd) => pmd.productSizes)
-  promotionDetail: PromotionDetail;
+  @OneToMany(() => PromotionDetail, (pmd) => pmd.productSize)
+  promotionDetails: PromotionDetail[];
 
-  @OneToMany(() => OrderDetail, (od) => od.productSizes)
-  orderDetail: OrderDetail;
+  @OneToMany(() => OrderDetail, (od) => od.productSize)
+  orderDetails: OrderDetail[];
 
   // HOOKS (AUTO VALIDATE)
   @BeforeInsert()

@@ -23,7 +23,7 @@ export class Cart extends BaseEntity {
   @Check('"quantity" > 0')
   quantity: number;
 
-  @OneToMany(() => Table, (t) => t.carts)
+  @ManyToOne(() => Table, (t) => t.carts)
   @JoinColumn({name: 'tableId', referencedColumnName: 'tableId'})
   table: Table;
 
@@ -31,9 +31,9 @@ export class Cart extends BaseEntity {
   @JoinColumn({name: 'productSizeId'})
   productSizes: ProductSize[];
 
-  @ManyToOne(() => Promotion, (pr) => pr.cart)
+  @ManyToOne(() => Promotion, (pr) => pr.carts)
   @JoinColumn({name: 'promotionId'})
-  promotions: Promotion[];
+  promotion: Promotion;
 
   // HOOKS (AUTO VALIDATE)
   @BeforeInsert()

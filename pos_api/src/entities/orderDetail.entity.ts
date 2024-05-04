@@ -43,14 +43,17 @@ export class OrderDetail extends BaseEntity {
   })
   order: Order;
 
-  @ManyToOne(() => ProductSize, (p) => p.orderDetail)
+  @ManyToOne(() => ProductSize, (p) => p.orderDetails)
   @JoinColumn({
     name: 'productSizeId',
     referencedColumnName: 'productSizeId'
   })
-  productSizes: ProductSize[];
+  productSize: ProductSize;
 
   @ManyToOne(() => Promotion, (pr) => pr.orderDetails)
+  @JoinColumn({
+    name: "promotionId"
+  })
   promotion: Promotion;
 
   // HOOKS (AUTO VALIDATE)

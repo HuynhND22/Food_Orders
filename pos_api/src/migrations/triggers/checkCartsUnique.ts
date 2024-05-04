@@ -3,7 +3,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 export class checkCartsUnique implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`
-        CREATE TRIGGER CheckCarts
+        CREATE OR ALTER TRIGGER CheckCarts
         ON dbo.Carts
         AFTER INSERT, UPDATE
         AS

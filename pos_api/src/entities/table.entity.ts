@@ -21,6 +21,9 @@ export class Table extends BaseEntity {
   statusId?: number;
   // @MaxLength(11)
 
+  @Column({type: 'varchar', nullable:true})
+  urlCode: string;
+
   @Column({type: 'varchar', length:255})
   qrCode: string;
 
@@ -46,7 +49,7 @@ export class Table extends BaseEntity {
   })
   orders: Order[];
 
-  @ManyToOne(() => Cart, (s) => s.table)
+  @OneToMany(() => Cart, (s) => s.table)
   carts: Cart[];
 
   // HOOKS (AUTO VALIDATE)

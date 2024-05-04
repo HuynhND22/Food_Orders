@@ -24,6 +24,7 @@ import { ResetPassword } from './entities/resetPasswor.entity';
 import { ActivateUser } from './entities/activateUser.entity';
 
 import { checkCartsUnique } from './migrations/triggers/checkCartsUnique';
+import { join } from 'path';
 
 export const AppDataSource = new DataSource({
   type: 'mssql',
@@ -55,9 +56,14 @@ export const AppDataSource = new DataSource({
     ActivateUser
   ],
   migrations: [
-    checkCartsUnique
+    // join(__dirname, '**', '*.\.{ts,js}')
+    // "src/migrations/**/*.ts"
+    'dist/**/*.entity.ts'
   ],
-  synchronize: false,
+  // migrations: [
+  //   checkCartsUnique
+  // ],
+  synchronize: true,
   logging: false,
   extra: {
     trustServerCertificate: true,

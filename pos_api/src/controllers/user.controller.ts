@@ -3,6 +3,7 @@ import { AppDataSource } from '../data-source';
 import { IsNull, Not } from 'typeorm';
 import { User } from '../entities/user.entity';
 import checkUnique from '../helpers/checkUnique';
+import { handleUniqueError } from '../helpers/handleUniqueError';
 
 
 const repository = AppDataSource.getRepository(User);
@@ -46,13 +47,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         return res.json(user);
     } catch (error:any) {
         if(error.number == 2627) {
-            const regex = /The duplicate key value is \((.*?)\)/;
-            let message = error.originalError.message.match(regex);
-            message[1] = message[1] + ' already exists'
-
+            const message = handleUniqueError(error);
             return res.status(400).json({ error: message });
         }
-        console.error(error.originalError.message.split('.')[1] );
+        console.error(error);
         return res.status(500).json({ error: error });
     }
 }
@@ -67,7 +65,11 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
         Object.assign(user, data);
         await repository.save(user);
         return res.json(user);
-    } catch (error) {
+    } catch (error:any) {
+        if(error.number == 2627) {
+            const message = handleUniqueError(error);
+            return res.status(400).json({ error: message });
+        }
         console.error(error);
         return res.status(500).json({ error: 'Internal server error' });
     }
@@ -132,7 +134,7 @@ const checkUserUnique = async (req: Request, res: Response, next: NextFunction) 
     const {value, ignore, field} = req.query;
   
     if(ignore && ignore == value) {
-      return res.sendStatus(200)
+        return res.sendStatus(200)
     }
 
     try {

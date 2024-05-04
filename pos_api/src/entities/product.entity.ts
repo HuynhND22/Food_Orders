@@ -28,10 +28,6 @@ export class Product extends BaseEntity {
   @Column({type: 'nvarchar', length: 255, unique: true})
   name: string;
   
-  @Column({type: 'int', default: 0})
-  @Check(`"discount" >= 0 AND "discount" <= 50`)
-  discount: number;
-  
   @Column({type: 'nvarchar', length:255, nullable: true})
   description?: string;
 
