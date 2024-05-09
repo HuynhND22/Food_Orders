@@ -34,7 +34,7 @@ wardId?: number;
   // @MaxLength(11)
 
   @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
-  createdAt: String;
+  createdAt: String
 
   @UpdateDateColumn({ type: "datetime", default: () => "GETUTCDATE()", nullable:true, onUpdate: "GETUTCDATE()" })
   updatedAt?: String;
