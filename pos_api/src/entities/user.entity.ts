@@ -29,6 +29,9 @@ export class User extends BaseEntity {
   
   @Column({unique: true ,type: 'nvarchar', length: 255 })
   email: string;
+
+  @Column({type: 'varchar', length: 255, nullable:true })
+  password: string;
   
   @Column({unique: true ,type: 'nvarchar', length: 15, nullable: true })
   phoneNumber?: string;
@@ -44,7 +47,7 @@ export class User extends BaseEntity {
   statusId: number;
   // @MaxLength(11)
 
-  @Column({type: 'nvarchar', length: 11, default: ["N'Nhân viên'"]})
+  @Column({type: 'nvarchar', length: 20, default: ["N'Nhân viên'"]})
   @IsIn(['Quản trị viên', 'Nhân viên'])
   role: string;
 

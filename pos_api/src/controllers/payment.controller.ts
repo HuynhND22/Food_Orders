@@ -21,7 +21,7 @@ const paymentHandler = async (req: Request, res: Response, next: NextFunction) =
         if(!order){ 
             return res.sendStatus(410);
         }
-        if (order.payment == 'Tiền mặt') {
+        if (order.payment != 'Ngân hàng') {
             return res.status(400).json({error: 'Online payment method only available for payment type [Ngân hàng]'})
         }
         if (order.statusId != 10) {
@@ -47,28 +47,29 @@ const paymentHandler = async (req: Request, res: Response, next: NextFunction) =
                     const histories = await getHistories(login.access_token, accountId, deviceId);
                     if (histories) {
                         const filterCRDT = histories.transactionInfos.filter((transaction:any) => transaction.creditDebitIndicator === 'CRDT'); //CRDT (+), DBIT(-)
-                        // const transactionsWithoutCategory = filteredTransactions.map(({...transaction }) => transaction);
-                        const result = filterCRDT.find((transaction:any) => transaction.description === `${order.orderId}` && transaction.amount == totalPrice[0].TotalPrice);
-                        
+                        const result = filterCRDT.find((transaction:any) => transaction.description.indexOf(order.orderId) !== -1 && transaction.amount == totalPrice[0].TotalPrice);
                         console.log(result);
-                        if (result) {
-                            clearInterval(waitting);
-                            paymentSuccess = true;
-                            try {
+                        try {
+                            if (result) {
+                                clearInterval(waitting);
+                                paymentSuccess = true;
                                 const paymented = {statusId: 11};
                                 Object.assign(order, paymented);
                                 await repository.save(order);
-                            } catch (error) {
-                                console.log(error);
-                                return res.status(400).json({error: 'update status order failed'});
+                                io.on('connection', (socket:any) => {
+                                    socket.emit('orders', 'closeTabPayment');
+                                });
+                                res.status(200).json({message: 'Payment success'});
+                                process.exit()
                             }
-                            io.on('connection', (socket:any) => {
-                                socket.emit('orders', 'closeTabPayment');
-                            });
-                            return res.status(200).json({message: 'Payment success'});
+                        } catch (error) {
+                            console.log(error);
+                            res.status(400).json({error: 'update status order failed'});
+                            process.exit()
                         }
                     }
-                }, 5000);
+                }, 500);
+
                 setTimeout(() => {
                     if (!paymentSuccess) {
                         clearInterval(waitting);

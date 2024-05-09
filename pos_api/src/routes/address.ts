@@ -1,7 +1,5 @@
 import express from 'express';
-
 import addressController from '../controllers/address.controller';
-// import validateCategory from '../middleware/validators/categoriesValidator';
 
 const router = express.Router();
 

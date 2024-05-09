@@ -13,10 +13,10 @@ import cartRouter from './routes/carts';
 import addressRouter from './routes/address';
 import promotionRouter from './routes/promotions';
 import paymentRouter from './routes/payments';
-// import suppliersRouter from './routes/suppliers';
-// import productsRouter from './routes/products';
+import suppliersRouter from './routes/suppliers';
+import productsRouter from './routes/products';
 import ordersRouter from './routes/orders';
-// import advancedRouter from './routes/advanced';
+import authRouter from './routes/authentications';
 
 const app: Express = express();
 
@@ -28,6 +28,7 @@ AppDataSource.initialize().then(async () => {
   app.use(express.urlencoded({ extended: false }));
   app.use(cookieParser());
   app.use(express.static(path.join(__dirname, 'public')));
+  app.use(express.static(path.resolve('./public')));
 
   // use cors
   app.use(cors({ origin: '*' }));
@@ -40,9 +41,10 @@ AppDataSource.initialize().then(async () => {
   app.use('/address', addressRouter);
   app.use('/promotions', promotionRouter);
   app.use('/payments', paymentRouter);
-  // app.use('/suppliers', suppliersRouter);
+  app.use('/suppliers', suppliersRouter);
+  app.use('/products', productsRouter);
   app.use('/orders', ordersRouter);
-  // app.use('/advanced', advancedRouter);
+  app.use('/auth', authRouter);
 
   // catch 404 and forward to error handler
   app.use(function (req: Request, res: Response, next: NextFunction) {

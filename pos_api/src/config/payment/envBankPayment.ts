@@ -56,7 +56,7 @@ export async function handleLogin(username:any, password:any, deviceId:any) {
 }
 
 export async function getHistories(token:any, accountId:any, deviceId:any) {
-  const fromDate = moment().tz('Asia/Ho_Chi_Minh').subtract(1, 'days').format('YYYYMMDD hh:mm:ss');
+  const fromDate = moment().tz('Asia/Ho_Chi_Minh').format('YYYYMMDD hh:mm:ss');
   const toDate = moment().tz('Asia/Ho_Chi_Minh').format('YYYYMMDD hh:mm:ss');
 
   const data = {
@@ -104,6 +104,7 @@ export async function getHistories(token:any, accountId:any, deviceId:any) {
     );
     return response.data;
   } catch (error) {
-    console.log('error   s' + error);
+    console.log('error: ' + error);
+    throw error;
   }
 }

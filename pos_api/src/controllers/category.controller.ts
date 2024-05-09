@@ -3,6 +3,7 @@ import { AppDataSource } from '../data-source';
 import { Category } from '../entities/category.entity';
 import { IsNull, Not } from 'typeorm';
 import checkUnique from '../helpers/checkUnique';
+import { handleUniqueError } from '../helpers/handleUniqueError';
 
 const repository = AppDataSource.getRepository(Category);
 
@@ -13,9 +14,8 @@ const getAll = async (req: Request, res: Response, next: NextFunction) => {
         res.status(204).send({
           error: 'No content',
         });
-      } else {
-        res.json(categories);
       }
+      return res.json(categories);
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Internal server error' });
@@ -26,10 +26,7 @@ const getAll = async (req: Request, res: Response, next: NextFunction) => {
 const getById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const category = await repository.findOneBy({ categoryId: parseInt(req.params.id) });
-      if (!category) {
-        return res.status(410).json({ error: 'Not found' });
-      }
-      res.json(category);
+      category ? res.json(category) : res.status(410);
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Internal server error' });
@@ -45,9 +42,10 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       await repository.save(category);
       res.status(201).json(category);
     } catch (error: any) {
-      if(error.number === 2627) {
-        return res.status(400).json({ error: 'Category already exists' });
-      }
+      if(error.number == 2627) {
+        const message = handleUniqueError(error);
+        return res.status(400).json({ error: message });
+    }
       console.error(error);
       res.status(500).json({ error: 'Internal server error' });
     }
@@ -65,7 +63,11 @@ const update =async (req: Request, res: Response, next: NextFunction) => {
   
       const updatedCategory = await repository.findOneBy({ categoryId: parseInt(req.params.id) });
       res.json(updatedCategory);
-    } catch (error) {
+    } catch (error:any) {
+      if(error.number == 2627) {
+        const message = handleUniqueError(error);
+        return res.status(400).json({ error: message });
+    }
       console.error(error);
       res.status(500).json({ error: 'Internal server error' });
     }

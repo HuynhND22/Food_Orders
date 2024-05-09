@@ -5,7 +5,6 @@ import { User } from '../entities/user.entity';
 import checkUnique from '../helpers/checkUnique';
 import { handleUniqueError } from '../helpers/handleUniqueError';
 
-
 const repository = AppDataSource.getRepository(User);
 
 const getAll = async (req: Request, res: Response, next: NextFunction) => {
@@ -40,7 +39,19 @@ const getById = async (req: Request, res: Response, next: NextFunction) => {
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        const bcrypt = require('bcrypt');
+        const saltRounds = 7;
+        
         let data = req.body;
+        const password = req.body.password;
+
+        if (data['password']) {
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
+            data['password'] = hashedPassword;
+            console.log('password: ' + password);
+            console.log(hashedPassword)
+        } 
+
         const user = new User();
         Object.assign(user, data);
         await repository.save(user);
@@ -56,12 +67,17 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 }
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
+    const bcrypt = require('bcrypt');
+    const saltRounds = 7;
     try {
         const user = await repository.findOneBy({ userId: parseInt(req.params.id) });
         if (!user) {
             return res.status(410).json({ error: 'Not found' });
         }
         let data = req.body;
+        const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
+        data['password'] = hashedPassword;
+
         Object.assign(user, data);
         await repository.save(user);
         return res.json(user);
