@@ -54,7 +54,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         Object.assign(table, data);
         await repository.save(table);
 
-        await QRCode.toFile(`./public/upload/tables/${simpleName}.png`, process.env.HOST_CLIENT + `/tables/${data['urlCode']}`, {
+        await QRCode.toFile(`./public/upload/tables/${simpleName}.png`, `${process.env.HOST_CLIENT}/tables/${data['urlCode']}`, {
             errorCorrectionLevel: 'H'
           }, function(err:any) {
             if (err) throw err;
@@ -87,7 +87,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
             try {
                 data['qrCode'] =  `./public/upload/tables/${simpleName}.png`;
                 data['urlCode'] =  base64Url.encode(simpleName);
-                await QRCode.toFile(`./public/upload/tables/${simpleName}.png`, process.env.HOST_CLIENT + `/tables/${data['urlCode']}`, {
+                await QRCode.toFile(`./public/upload/tables/${simpleName}.png`, `${process.env.HOST_CLIENT}/tables/${data['urlCode']}`, {
                     errorCorrectionLevel: 'H'
                   }, function(err:any) {
                     if (err) throw err;
