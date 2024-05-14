@@ -1,16 +1,11 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import Layout from './components/layout/layout'; // Import your Layout component
-// Import your Login component
+import * as React from 'react';
+import './App.css';
+import Layout from '../src/components/layout/index'
 
-const App: React.FC = () => {
+function App() {
   return (
-    <Router>
-      <Switch>
-        <Route path="/" render={() => <Layout />} /> {/* Route for Layout component */}
-      </Switch>
-    </Router>
+  <Layout/>
   );
-};
+}
 
 export default App;
