@@ -1,4 +1,4 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { IsNotEmpty, MaxLength, maxLength, validateOrReject } from 'class-validator';
 import { Product } from './product.entity';
 import { PromotionDetail } from './promotionDetail.entity';
@@ -30,6 +30,9 @@ export class ProductSize extends BaseEntity {
   @Column({type: 'int'})
   @Check('"stock" >= 0')
   stock: number;
+
+  @DeleteDateColumn({nullable: true})
+  deletedAt?: String;
 
   @ManyToOne(() => Product, (p) => p.productSizes)
   @JoinColumn({

@@ -22,7 +22,7 @@ export class Table extends BaseEntity {
   // @MaxLength(11)
 
   @Column({type: 'varchar', nullable:true})
-  urlCode: string;
+  uriCode: string;
 
   @Column({type: 'varchar', length:255})
   qrCode: string;

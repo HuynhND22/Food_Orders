@@ -8,7 +8,7 @@ const router = express.Router();
 router.get('/all', promotionController.getAll);
 router.get('/id/:id', promotionController.getById);
 router.post('/create/', validatePromotion, promotionController.create);
-router.put('/update/:id', validatePromotion, promotionController.update);
+router.patch('/update/:id', validatePromotion, promotionController.update);
 router.delete('/remove/:id', promotionController.softDelete);
 router.get('/deleted/', promotionController.getDeleted);
 router.post('/restore/:id', promotionController.restore);

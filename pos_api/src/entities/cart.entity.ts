@@ -11,7 +11,6 @@ export class Cart extends BaseEntity {
   
   @Column({ name: 'tableId'})
   tableId: number;
-  @IsNotEmpty()
 
   @Column({type: 'int', nullable:true})
   productSizeId: number;

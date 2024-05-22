@@ -14,7 +14,7 @@ export class Image extends BaseEntity {
   // @MaxLength(11)
 
   @Column({type: 'nvarchar', length:255, unique: true})
-  name: string;
+  uri: string;
 
   @Column({type: 'bit'})
   cover: boolean;

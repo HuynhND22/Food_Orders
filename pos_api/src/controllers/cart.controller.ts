@@ -8,7 +8,7 @@ const getByTableId = async (req: Request, res: Response, next: NextFunction) => 
     const tableId = req.params.tableId;
     console.log(tableId);
     try {
-        const cart = await repository.findOne({ where: {tableId: parseInt(tableId)} });
+        const cart = await repository.find({ where: {tableId: parseInt(tableId)}, relations: ['productSizes.product','productSizes.size', 'promotion'] });
         cart ? res.status(200).json(cart) : res.sendStatus(410);
     } catch (error) {
         console.error(error);
@@ -30,7 +30,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             return res.status(400).json({ error: 'Cart already exists' });
         }
         console.error(error);
-        return res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json(error);
     }
 }
 

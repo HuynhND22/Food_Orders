@@ -63,7 +63,7 @@ export const AppDataSource = new DataSource({
   // migrations: [
   //   checkCartsUnique
   // ],
-  synchronize: false,
+  synchronize: true,
   logging: false,
   extra: {
     trustServerCertificate: true,

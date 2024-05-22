@@ -78,19 +78,15 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
         await queryRunner.startTransaction();
         try {
             const promotion = req.body
-            const found = await queryRunner.manager.findOne(Promotion, { where: { promotionId: parseInt(req.params.id)} });
-            
-            if (found) {
-                found.name = promotion.name;
-                found.limit = promotion.limit;
-                found.price = promotion.price;
-                found.startDate = promotion.startDate;
-                found.statusId = promotion.statusId;
-            } else {
-                return res.sendStatus(410);
-            }
+            const found:any = await queryRunner.manager.findOne(Promotion, { where: { promotionId: parseInt(req.params.id)} });
+            if(!found) return res.sendStatus(410);
+
+            Object.entries(promotion).forEach(([key, value]:any) => {
+                found[key] = value;
+            });
             
             await queryRunner.manager.save(found, promotion);
+            
             if(promotion.promotionDetails){
                 await queryRunner.manager.delete(PromotionDetail, {promotionId: parseInt(req.params.id)})
                 const promotionDetails = promotion.promotionDetails.map((pd:any) => {
