@@ -20,25 +20,6 @@ app.set('port', port);
  */
 
 const server = http.createServer(app);
-const io = require('socket.io')(server, {
-  cors: {
-    origin: true,
-    credentials: true
-  }
-});
-
-io.on('connection', (socket:any) => {
-  console.log('A client connected.');
-
-  socket.on('chat message', (msg:any) => {
-    console.log(`Received message: ${msg}`);
-    io.emit('chat message', msg);
-  });
-
-  socket.on('disconnect', () => {
-    console.log('A client disconnected.');
-  });
-});
 
 /**
  * Listen on provided port, on all network interfaces.
