@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import { getDeviceId } from "../config/payment/ultil";
 import { AppDataSource } from '../data-source';
 import { handleLogin, getHistories } from "../config/payment/envBankPayment";
-require('dotEnv').config();
+require('dotenv').config();
 
 import express from "express";
 import http from "http";
