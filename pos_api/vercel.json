@@ -3,13 +3,7 @@
     "builds": [
         {
             "src": "bin/www.ts",
-            "use": "@vercel/node",
-            "config": {
-                "includeFiles": [
-                    "src/**",
-                    "bin/**"
-                ]
-            }
+            "use": "@vercel/node"
         }
     ],
     "routes": [
