@@ -45,6 +45,7 @@ AppDataSource.initialize().then(async () => {
   app.use('/products', productsRouter);
   app.use('/orders', ordersRouter);
   app.use('/auth', authRouter);
+  app.use('/', indexRouter);
 
   // catch 404 and forward to error handler
   app.use(function (req: Request, res: Response, next: NextFunction) {
