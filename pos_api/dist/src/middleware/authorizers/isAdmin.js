@@ -14,18 +14,16 @@ require('dotenv').config();
 const checkJWT = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const token = req.header('Authorization');
-        if (!token) {
-            return res.status(401).json({ message: 'Unauthorized' });
+        const auth = yield jwt.decode(token === null || token === void 0 ? void 0 : token.replace('Bearer ', ''), process.env.JWT_SECRET);
+        if (auth.role !== 'Quản trị viên') {
+            return res.status(403).json({ message: 'Forbidden' });
         }
-        const check = yield jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
-        const role = yield jwt.decode(token.replace('Bearer ', ''), process.env.JWT_SECRET);
-        console.log(role.role);
-        if (check)
-            next();
+        ;
+        next();
     }
     catch (error) {
         console.log(error);
-        return res.status(401).json({ message: 'Unauthorized' });
+        return res.status(403).json({ message: 'Forbidden' });
     }
 });
 exports.default = checkJWT;

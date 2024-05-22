@@ -18,12 +18,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Category = void 0;
+exports.Cart = void 0;
 const typeorm_1 = require("typeorm");
 const class_validator_1 = require("class-validator");
-const product_entity_1 = require("./product.entity");
-let Category = class Category extends typeorm_1.BaseEntity {
-    // HOOKS (AUTO VALIDATE)
+// import { Product } from './product.entity';
+// import { Table } from './table.entity';
+// import { Promotion } from './promotion.entity';
+let Cart = class Cart extends typeorm_1.BaseEntity {
     validate() {
         return __awaiter(this, void 0, void 0, function* () {
             yield (0, class_validator_1.validateOrReject)(this);
@@ -31,42 +32,45 @@ let Category = class Category extends typeorm_1.BaseEntity {
     }
 };
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)({ primaryKeyConstraintName: 'categoryId' }),
+    (0, typeorm_1.PrimaryColumn)({ name: 'tableId' }),
     __metadata("design:type", Number)
-], Category.prototype, "categoryId", void 0);
+], Cart.prototype, "tableId", void 0);
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
-    (0, typeorm_1.Column)({ unique: true, type: 'nvarchar', length: 255 }),
-    __metadata("design:type", String)
-], Category.prototype, "name", void 0);
+    (0, typeorm_1.Column)({ type: 'int' }),
+    __metadata("design:type", Number)
+], Cart.prototype, "productId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'nvarchar', length: 255, nullable: true }),
-    __metadata("design:type", String)
-], Category.prototype, "description", void 0);
+    (0, typeorm_1.Column)({ type: 'int' }),
+    __metadata("design:type", Number)
+], Cart.prototype, "promotionId", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)({ type: 'datetime', default: () => "GETUTCDATE()" }),
-    __metadata("design:type", Date)
-], Category.prototype, "createdAt", void 0);
+    (0, typeorm_1.Column)({ type: 'int' }),
+    __metadata("design:type", Number)
+], Cart.prototype, "quantity", void 0);
 __decorate([
-    (0, typeorm_1.UpdateDateColumn)({ type: "datetime", default: () => "GETUTCDATE()", nullable: true, onUpdate: "GETUTCDATE()" }),
-    __metadata("design:type", String)
-], Category.prototype, "updatedAt", void 0);
-__decorate([
-    (0, typeorm_1.DeleteDateColumn)({ nullable: true }),
-    __metadata("design:type", String)
-], Category.prototype, "deletedAt", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(() => product_entity_1.Product, (p) => p.category),
-    __metadata("design:type", Array)
-], Category.prototype, "products", void 0);
-__decorate([
+    (0, class_validator_1.MaxLength)(2)
+    //   @OneToOne(() => Table, (t) => t.cart)
+    //   @JoinColumn({ name: 'tableId' })
+    //   table: Product[];
+    //   @OneToMany(() => Product, (p) => p.cart)
+    //   @JoinColumn({ name: 'productId' })
+    //   products: Product[];
+    //   @OneToMany(() => Promotion, (pr) => pr.cart)
+    //   @JoinColumn({ 
+    //     name: 'promotionId',
+    //     // referencedColumnName: 'promotionId'
+    //   })
+    //   promotions: Product[];
+    // HOOKS (AUTO VALIDATE)
+    ,
     (0, typeorm_1.BeforeInsert)(),
     (0, typeorm_1.BeforeUpdate)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], Category.prototype, "validate", null);
-Category = __decorate([
-    (0, typeorm_1.Entity)({ name: 'Categories' })
-], Category);
-exports.Category = Category;
+], Cart.prototype, "validate", null);
+Cart = __decorate([
+    (0, typeorm_1.Entity)({ name: 'Carts' })
+], Cart);
+exports.Cart = Cart;

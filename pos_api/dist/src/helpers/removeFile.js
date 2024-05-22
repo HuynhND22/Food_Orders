@@ -9,23 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const jwt = require("jsonwebtoken");
-require('dotenv').config();
-const checkJWT = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const token = req.header('Authorization');
-        if (!token) {
-            return res.status(401).json({ message: 'Unauthorized' });
-        }
-        const check = yield jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
-        const role = yield jwt.decode(token.replace('Bearer ', ''), process.env.JWT_SECRET);
-        console.log(role.role);
-        if (check)
-            next();
-    }
-    catch (error) {
-        console.log(error);
-        return res.status(401).json({ message: 'Unauthorized' });
-    }
+const fs_1 = require("fs");
+const remove = (uri) => __awaiter(void 0, void 0, void 0, function* () {
+    (0, fs_1.unlink)(uri, (err) => {
+        if (err)
+            throw err;
+        console.log('unlinked');
+    });
 });
-exports.default = checkJWT;
+exports.default = remove;

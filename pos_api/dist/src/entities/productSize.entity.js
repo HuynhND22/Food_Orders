@@ -18,15 +18,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Product = void 0;
+exports.ProductSize = void 0;
 const typeorm_1 = require("typeorm");
 const class_validator_1 = require("class-validator");
-const category_entity_1 = require("./category.entity");
-const image_entity_1 = require("./image.entity");
-const supplier_entity_1 = require("./supplier.entity");
-const status_entity_1 = require("./status.entity");
-const productSize_entity_1 = require("./productSize.entity");
-let Product = class Product extends typeorm_1.BaseEntity {
+const product_entity_1 = require("./product.entity");
+const promotionDetail_entity_1 = require("./promotionDetail.entity");
+const size_entity_1 = require("./size.entity");
+const orderDetail_entity_1 = require("./orderDetail.entity");
+const cart_entity_1 = require("./cart.entity");
+let ProductSize = class ProductSize extends typeorm_1.BaseEntity {
     // HOOKS (AUTO VALIDATE)
     validate() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -35,80 +35,71 @@ let Product = class Product extends typeorm_1.BaseEntity {
     }
 };
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)({ primaryKeyConstraintName: 'productId' }),
+    (0, typeorm_1.PrimaryGeneratedColumn)({ name: 'productSizeId' }),
     __metadata("design:type", Number)
-], Product.prototype, "productId", void 0);
+], ProductSize.prototype, "productSizeId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ name: 'sizeId', comment: 'Classifier Size', nullable: true }),
+    __metadata("design:type", Number)
+], ProductSize.prototype, "sizeId", void 0);
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
-    (0, typeorm_1.Column)({ type: 'int' }),
+    (0, typeorm_1.Column)({ name: 'productId', comment: 'Classifier Product' }),
     __metadata("design:type", Number)
-], Product.prototype, "categoryId", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'int' }),
-    __metadata("design:type", Number)
-], Product.prototype, "supplierId", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'nvarchar', length: 255, unique: true }),
-    __metadata("design:type", String)
-], Product.prototype, "name", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'nvarchar', length: 255, nullable: true }),
-    __metadata("design:type", String)
-], Product.prototype, "description", void 0);
+], ProductSize.prototype, "productId", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'int' }),
+    (0, typeorm_1.Check)('"price" > 0'),
     __metadata("design:type", Number)
-], Product.prototype, "statusId", void 0);
+], ProductSize.prototype, "price", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)({ type: 'datetime', default: () => "GETUTCDATE()" }),
-    __metadata("design:type", String)
-], Product.prototype, "createdAt", void 0);
+    (0, typeorm_1.Column)({ type: 'int', default: 0 }),
+    (0, typeorm_1.Check)(`"discount" >= 0 AND "discount" <= 50`),
+    __metadata("design:type", Number)
+], ProductSize.prototype, "discount", void 0);
 __decorate([
-    (0, typeorm_1.UpdateDateColumn)({ type: "datetime", default: () => "GETUTCDATE()", nullable: true, onUpdate: "GETUTCDATE()" }),
-    __metadata("design:type", String)
-], Product.prototype, "updatedAt", void 0);
+    (0, typeorm_1.Column)({ type: 'int' }),
+    (0, typeorm_1.Check)('"stock" >= 0'),
+    __metadata("design:type", Number)
+], ProductSize.prototype, "stock", void 0);
 __decorate([
     (0, typeorm_1.DeleteDateColumn)({ nullable: true }),
     __metadata("design:type", String)
-], Product.prototype, "deletedAt", void 0);
+], ProductSize.prototype, "deletedAt", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => category_entity_1.Category, (c) => c.products),
+    (0, typeorm_1.ManyToOne)(() => product_entity_1.Product, (p) => p.productSizes),
     (0, typeorm_1.JoinColumn)({
-        name: 'categoryId',
+        name: 'productId'
     }),
-    __metadata("design:type", category_entity_1.Category)
-], Product.prototype, "category", void 0);
+    __metadata("design:type", product_entity_1.Product)
+], ProductSize.prototype, "product", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => supplier_entity_1.Supplier, (s) => s.products),
+    (0, typeorm_1.ManyToOne)(() => size_entity_1.Size, (s) => s.productSizes),
     (0, typeorm_1.JoinColumn)({
-        name: 'supplierId',
+        name: 'sizeId'
     }),
-    __metadata("design:type", supplier_entity_1.Supplier)
-], Product.prototype, "supplier", void 0);
+    __metadata("design:type", size_entity_1.Size)
+], ProductSize.prototype, "size", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => image_entity_1.Image, (i) => i.product),
+    (0, typeorm_1.OneToMany)(() => cart_entity_1.Cart, (c) => c.productSizes),
+    __metadata("design:type", cart_entity_1.Cart)
+], ProductSize.prototype, "cart", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => promotionDetail_entity_1.PromotionDetail, (pmd) => pmd.productSize),
     __metadata("design:type", Array)
-], Product.prototype, "images", void 0);
+], ProductSize.prototype, "promotionDetails", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => productSize_entity_1.ProductSize, (s) => s.product),
+    (0, typeorm_1.OneToMany)(() => orderDetail_entity_1.OrderDetail, (od) => od.productSize),
     __metadata("design:type", Array)
-], Product.prototype, "productSizes", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => status_entity_1.Status, (c) => c.products),
-    (0, typeorm_1.JoinColumn)({
-        name: "statusId",
-        referencedColumnName: 'statusId'
-    }),
-    __metadata("design:type", status_entity_1.Status)
-], Product.prototype, "status", void 0);
+], ProductSize.prototype, "orderDetails", void 0);
 __decorate([
     (0, typeorm_1.BeforeInsert)(),
     (0, typeorm_1.BeforeUpdate)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], Product.prototype, "validate", null);
-Product = __decorate([
-    (0, typeorm_1.Entity)({ name: 'Products' })
-], Product);
-exports.Product = Product;
+], ProductSize.prototype, "validate", null);
+ProductSize = __decorate([
+    (0, typeorm_1.Entity)({ name: 'ProductSizes' })
+], ProductSize);
+exports.ProductSize = ProductSize;

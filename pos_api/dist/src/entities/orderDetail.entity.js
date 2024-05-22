@@ -18,15 +18,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Product = void 0;
+exports.OrderDetail = void 0;
 const typeorm_1 = require("typeorm");
 const class_validator_1 = require("class-validator");
-const category_entity_1 = require("./category.entity");
-const image_entity_1 = require("./image.entity");
-const supplier_entity_1 = require("./supplier.entity");
-const status_entity_1 = require("./status.entity");
+const order_entity_1 = require("./order.entity");
+const promotion_entity_1 = require("./promotion.entity");
 const productSize_entity_1 = require("./productSize.entity");
-let Product = class Product extends typeorm_1.BaseEntity {
+let OrderDetail = class OrderDetail extends typeorm_1.BaseEntity {
     // HOOKS (AUTO VALIDATE)
     validate() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -35,80 +33,73 @@ let Product = class Product extends typeorm_1.BaseEntity {
     }
 };
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)({ primaryKeyConstraintName: 'productId' }),
+    (0, typeorm_1.PrimaryGeneratedColumn)({ primaryKeyConstraintName: 'orderDetailId' }),
     __metadata("design:type", Number)
-], Product.prototype, "productId", void 0);
+], OrderDetail.prototype, "orderDetailId", void 0);
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     (0, typeorm_1.Column)({ type: 'int' }),
     __metadata("design:type", Number)
-], Product.prototype, "categoryId", void 0);
+], OrderDetail.prototype, "orderId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'int' }),
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
     __metadata("design:type", Number)
-], Product.prototype, "supplierId", void 0);
+], OrderDetail.prototype, "productSizeId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'nvarchar', length: 255, unique: true }),
-    __metadata("design:type", String)
-], Product.prototype, "name", void 0);
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    __metadata("design:type", Number)
+], OrderDetail.prototype, "promotionId", void 0);
+__decorate([
+    (0, class_validator_1.MaxLength)(11),
+    (0, typeorm_1.Column)({ type: 'int', default: 1 }),
+    (0, typeorm_1.Check)('"quantity" > 0'),
+    __metadata("design:type", Number)
+], OrderDetail.prototype, "quantity", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'nvarchar', length: 255, nullable: true }),
     __metadata("design:type", String)
-], Product.prototype, "description", void 0);
+], OrderDetail.prototype, "description", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'int' }),
+    (0, typeorm_1.Check)('"price" > 0'),
     __metadata("design:type", Number)
-], Product.prototype, "statusId", void 0);
+], OrderDetail.prototype, "price", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)({ type: 'datetime', default: () => "GETUTCDATE()" }),
-    __metadata("design:type", String)
-], Product.prototype, "createdAt", void 0);
+    (0, typeorm_1.Column)({ type: 'int', default: 0 }),
+    (0, typeorm_1.Check)(`"discount" >= 0 AND "discount" <= 50`),
+    __metadata("design:type", Number)
+], OrderDetail.prototype, "discount", void 0);
 __decorate([
-    (0, typeorm_1.UpdateDateColumn)({ type: "datetime", default: () => "GETUTCDATE()", nullable: true, onUpdate: "GETUTCDATE()" }),
-    __metadata("design:type", String)
-], Product.prototype, "updatedAt", void 0);
-__decorate([
-    (0, typeorm_1.DeleteDateColumn)({ nullable: true }),
-    __metadata("design:type", String)
-], Product.prototype, "deletedAt", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => category_entity_1.Category, (c) => c.products),
+    (0, typeorm_1.ManyToOne)(() => order_entity_1.Order, (o) => o.orderDetails),
     (0, typeorm_1.JoinColumn)({
-        name: 'categoryId',
+        name: 'orderId',
+        referencedColumnName: 'orderId'
     }),
-    __metadata("design:type", category_entity_1.Category)
-], Product.prototype, "category", void 0);
+    __metadata("design:type", order_entity_1.Order)
+], OrderDetail.prototype, "order", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => supplier_entity_1.Supplier, (s) => s.products),
+    (0, typeorm_1.ManyToOne)(() => productSize_entity_1.ProductSize, (p) => p.orderDetails),
     (0, typeorm_1.JoinColumn)({
-        name: 'supplierId',
+        name: 'productSizeId',
+        referencedColumnName: 'productSizeId'
     }),
-    __metadata("design:type", supplier_entity_1.Supplier)
-], Product.prototype, "supplier", void 0);
+    __metadata("design:type", productSize_entity_1.ProductSize)
+], OrderDetail.prototype, "productSize", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => image_entity_1.Image, (i) => i.product),
-    __metadata("design:type", Array)
-], Product.prototype, "images", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(() => productSize_entity_1.ProductSize, (s) => s.product),
-    __metadata("design:type", Array)
-], Product.prototype, "productSizes", void 0);
-__decorate([
-    (0, typeorm_1.ManyToOne)(() => status_entity_1.Status, (c) => c.products),
+    (0, typeorm_1.ManyToOne)(() => promotion_entity_1.Promotion, (pr) => pr.orderDetails),
     (0, typeorm_1.JoinColumn)({
-        name: "statusId",
-        referencedColumnName: 'statusId'
+        name: "promotionId"
     }),
-    __metadata("design:type", status_entity_1.Status)
-], Product.prototype, "status", void 0);
+    __metadata("design:type", promotion_entity_1.Promotion)
+], OrderDetail.prototype, "promotion", void 0);
 __decorate([
     (0, typeorm_1.BeforeInsert)(),
     (0, typeorm_1.BeforeUpdate)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], Product.prototype, "validate", null);
-Product = __decorate([
-    (0, typeorm_1.Entity)({ name: 'Products' })
-], Product);
-exports.Product = Product;
+], OrderDetail.prototype, "validate", null);
+OrderDetail = __decorate([
+    (0, typeorm_1.Entity)({ name: 'OrderDetails' })
+], OrderDetail);
+exports.OrderDetail = OrderDetail;

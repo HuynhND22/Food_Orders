@@ -13,7 +13,7 @@ export class Image extends BaseEntity {
   productId: number;
   // @MaxLength(11)
 
-  @Column({type: 'nvarchar', length:255, unique: true})
+  @Column({type: 'nvarchar', length:255, unique: true, nullable: true})
   uri: string;
 
   @Column({type: 'bit'})

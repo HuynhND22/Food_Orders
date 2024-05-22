@@ -8,66 +8,100 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Order = void 0;
 const typeorm_1 = require("typeorm");
-const order_details_entity_1 = require("./order-details.entity");
-const customer_entity_1 = require("./customer.entity");
-const employee_entity_1 = require("./employee.entity");
-let Order = class Order {
+const class_validator_1 = require("class-validator");
+const orderDetail_entity_1 = require("./orderDetail.entity");
+const user_entity_1 = require("./user.entity");
+const table_entity_1 = require("./table.entity");
+const status_entity_1 = require("./status.entity");
+let Order = class Order extends typeorm_1.BaseEntity {
+    // HOOKS (AUTO VALIDATE)
+    validate() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield (0, class_validator_1.validateOrReject)(this);
+        });
+    }
 };
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)({ name: 'Id' }),
+    (0, typeorm_1.PrimaryGeneratedColumn)({ primaryKeyConstraintName: 'orderId' }),
     __metadata("design:type", Number)
-], Order.prototype, "id", void 0);
+], Order.prototype, "orderId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ name: 'CreatedDate', type: 'datetime', default: () => 'CURRENT_TIMESTAMP' }),
-    __metadata("design:type", Date)
-], Order.prototype, "createdDate", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ name: 'ShippedDate', type: 'datetime', nullable: true }),
-    __metadata("design:type", Date)
-], Order.prototype, "shippedDate", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ name: 'Status', type: 'varchar', default: 'WAITING', length: 50 }),
-    __metadata("design:type", String)
-], Order.prototype, "status", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ name: 'Description', type: 'nvarchar', length: 'MAX', nullable: true }),
-    __metadata("design:type", String)
-], Order.prototype, "description", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ name: 'ShippingAddress', type: 'nvarchar', nullable: true, length: 500 }),
-    __metadata("design:type", String)
-], Order.prototype, "shippingAddress", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ name: 'ShippingCity', type: 'nvarchar', nullable: true, length: 50 }),
-    __metadata("design:type", String)
-], Order.prototype, "shippingCity", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ name: 'PaymentType', type: 'varchar', length: 20, default: 'CASH' }),
-    __metadata("design:type", String)
-], Order.prototype, "paymentType", void 0);
-__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
     (0, typeorm_1.Column)({ type: 'int' }),
     __metadata("design:type", Number)
-], Order.prototype, "customerId", void 0);
+], Order.prototype, "tableId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'int' }),
+    (0, typeorm_1.Column)({ type: 'int', default: 10 }),
     __metadata("design:type", Number)
-], Order.prototype, "employeeId", void 0);
+], Order.prototype, "statusId", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => customer_entity_1.Customer, (c) => c.orders),
-    __metadata("design:type", customer_entity_1.Customer)
-], Order.prototype, "customer", void 0);
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    __metadata("design:type", Number)
+], Order.prototype, "userId", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => employee_entity_1.Employee, (e) => e.orders),
-    __metadata("design:type", employee_entity_1.Employee)
-], Order.prototype, "employee", void 0);
+    (0, typeorm_1.Column)({ type: 'nvarchar', length: 255, default: ["N'Tiền mặt'"] }),
+    (0, class_validator_1.IsIn)(['Tiền mặt', 'Ngân hàng']),
+    __metadata("design:type", String)
+], Order.prototype, "payment", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => order_details_entity_1.OrderDetail, (od) => od.order),
+    (0, typeorm_1.CreateDateColumn)({ type: 'datetime', name: 'createdAt', default: () => "GETUTCDATE()" }),
+    __metadata("design:type", String)
+], Order.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)({ type: "datetime", default: () => "GETUTCDATE()", nullable: true, onUpdate: "GETUTCDATE()" }),
+    __metadata("design:type", String)
+], Order.prototype, "updatedAt", void 0);
+__decorate([
+    (0, typeorm_1.DeleteDateColumn)({ nullable: true }),
+    __metadata("design:type", String)
+], Order.prototype, "deletedAt", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => orderDetail_entity_1.OrderDetail, (od) => od.order),
     __metadata("design:type", Array)
 ], Order.prototype, "orderDetails", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => user_entity_1.User, (u) => u.orders),
+    (0, typeorm_1.JoinColumn)({
+        name: 'userId',
+        referencedColumnName: 'userId'
+    }),
+    __metadata("design:type", user_entity_1.User)
+], Order.prototype, "user", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => table_entity_1.Table, (p) => p.orders),
+    (0, typeorm_1.JoinColumn)({
+        name: 'tableId',
+        referencedColumnName: 'tableId'
+    }),
+    __metadata("design:type", table_entity_1.Table)
+], Order.prototype, "table", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => status_entity_1.Status, (s) => s.orders),
+    (0, typeorm_1.JoinColumn)({
+        name: "statusId",
+        referencedColumnName: 'statusId'
+    }),
+    __metadata("design:type", status_entity_1.Status)
+], Order.prototype, "status", void 0);
+__decorate([
+    (0, typeorm_1.BeforeInsert)(),
+    (0, typeorm_1.BeforeUpdate)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], Order.prototype, "validate", null);
 Order = __decorate([
     (0, typeorm_1.Entity)({ name: 'Orders' })
 ], Order);

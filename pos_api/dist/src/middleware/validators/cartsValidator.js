@@ -9,23 +9,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const jwt = require("jsonwebtoken");
-require('dotenv').config();
-const checkJWT = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+const yup_1 = require("yup");
+const cartSchema = (0, yup_1.object)().shape({
+    tableId: (0, yup_1.number)().required('TableId must be required').typeError('TableId must be a number'),
+    productSizeId: (0, yup_1.number)().notRequired().typeError('ProductSize must be a number'),
+    promotionId: (0, yup_1.number)().notRequired().typeError('PromotionId must be a number'),
+    quantity: (0, yup_1.number)().required('Quantity must be required')
+});
+const validateCart = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const token = req.header('Authorization');
-        if (!token) {
-            return res.status(401).json({ message: 'Unauthorized' });
-        }
-        const check = yield jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
-        const role = yield jwt.decode(token.replace('Bearer ', ''), process.env.JWT_SECRET);
-        console.log(role.role);
-        if (check)
-            next();
+        yield cartSchema.validate(req.body, { abortEarly: false });
+        next();
     }
     catch (error) {
         console.log(error);
-        return res.status(401).json({ message: 'Unauthorized' });
+        return res.status(400).send(error.errors);
     }
 });
-exports.default = checkJWT;
+exports.default = validateCart;

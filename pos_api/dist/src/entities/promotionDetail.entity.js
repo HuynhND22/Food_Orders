@@ -18,11 +18,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Category = void 0;
+exports.PromotionDetail = void 0;
 const typeorm_1 = require("typeorm");
 const class_validator_1 = require("class-validator");
-const product_entity_1 = require("./product.entity");
-let Category = class Category extends typeorm_1.BaseEntity {
+const promotion_entity_1 = require("./promotion.entity");
+const productSize_entity_1 = require("./productSize.entity");
+let PromotionDetail = class PromotionDetail extends typeorm_1.BaseEntity {
     // HOOKS (AUTO VALIDATE)
     validate() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -31,42 +32,49 @@ let Category = class Category extends typeorm_1.BaseEntity {
     }
 };
 __decorate([
-    (0, typeorm_1.PrimaryGeneratedColumn)({ primaryKeyConstraintName: 'categoryId' }),
+    (0, typeorm_1.PrimaryGeneratedColumn)({ type: 'int' }),
     __metadata("design:type", Number)
-], Category.prototype, "categoryId", void 0);
+], PromotionDetail.prototype, "promotionDetailId", void 0);
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
-    (0, typeorm_1.Column)({ unique: true, type: 'nvarchar', length: 255 }),
-    __metadata("design:type", String)
-], Category.prototype, "name", void 0);
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    __metadata("design:type", Number)
+], PromotionDetail.prototype, "promotionId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    __metadata("design:type", Number)
+], PromotionDetail.prototype, "productSizeId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int' }),
+    (0, typeorm_1.Check)('"quantity" > 0'),
+    __metadata("design:type", Number)
+], PromotionDetail.prototype, "quantity", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'nvarchar', length: 255, nullable: true }),
     __metadata("design:type", String)
-], Category.prototype, "description", void 0);
+], PromotionDetail.prototype, "description", void 0);
 __decorate([
-    (0, typeorm_1.CreateDateColumn)({ type: 'datetime', default: () => "GETUTCDATE()" }),
-    __metadata("design:type", Date)
-], Category.prototype, "createdAt", void 0);
+    (0, typeorm_1.ManyToOne)(() => productSize_entity_1.ProductSize, (ps) => ps.promotionDetails),
+    (0, typeorm_1.JoinColumn)({
+        name: 'productSizeId',
+    }),
+    __metadata("design:type", productSize_entity_1.ProductSize)
+], PromotionDetail.prototype, "productSize", void 0);
 __decorate([
-    (0, typeorm_1.UpdateDateColumn)({ type: "datetime", default: () => "GETUTCDATE()", nullable: true, onUpdate: "GETUTCDATE()" }),
-    __metadata("design:type", String)
-], Category.prototype, "updatedAt", void 0);
-__decorate([
-    (0, typeorm_1.DeleteDateColumn)({ nullable: true }),
-    __metadata("design:type", String)
-], Category.prototype, "deletedAt", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(() => product_entity_1.Product, (p) => p.category),
-    __metadata("design:type", Array)
-], Category.prototype, "products", void 0);
+    (0, typeorm_1.ManyToOne)(() => promotion_entity_1.Promotion, (pm) => pm.promotionDetails),
+    (0, typeorm_1.JoinColumn)({
+        name: 'promotionId'
+    }),
+    __metadata("design:type", promotion_entity_1.Promotion)
+], PromotionDetail.prototype, "promotion", void 0);
 __decorate([
     (0, typeorm_1.BeforeInsert)(),
     (0, typeorm_1.BeforeUpdate)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], Category.prototype, "validate", null);
-Category = __decorate([
-    (0, typeorm_1.Entity)({ name: 'Categories' })
-], Category);
-exports.Category = Category;
+], PromotionDetail.prototype, "validate", null);
+PromotionDetail = __decorate([
+    (0, typeorm_1.Entity)({ name: 'PromotionDetails' })
+], PromotionDetail);
+exports.PromotionDetail = PromotionDetail;

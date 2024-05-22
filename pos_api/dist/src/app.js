@@ -20,10 +20,16 @@ const path_1 = __importDefault(require("path"));
 const data_source_1 = require("./data-source");
 const index_1 = __importDefault(require("./routes/index"));
 const categories_1 = __importDefault(require("./routes/categories"));
+const tables_1 = __importDefault(require("./routes/tables"));
+const users_1 = __importDefault(require("./routes/users"));
+const carts_1 = __importDefault(require("./routes/carts"));
+const address_1 = __importDefault(require("./routes/address"));
+const promotions_1 = __importDefault(require("./routes/promotions"));
+const payments_1 = __importDefault(require("./routes/payments"));
 const suppliers_1 = __importDefault(require("./routes/suppliers"));
 const products_1 = __importDefault(require("./routes/products"));
 const orders_1 = __importDefault(require("./routes/orders"));
-const advanced_1 = __importDefault(require("./routes/advanced"));
+const authentications_1 = __importDefault(require("./routes/authentications"));
 const app = (0, express_1.default)();
 data_source_1.AppDataSource.initialize().then(() => __awaiter(void 0, void 0, void 0, function* () {
     console.log('Data source was initialized');
@@ -32,14 +38,21 @@ data_source_1.AppDataSource.initialize().then(() => __awaiter(void 0, void 0, vo
     app.use(express_1.default.urlencoded({ extended: false }));
     app.use((0, cookie_parser_1.default)());
     app.use(express_1.default.static(path_1.default.join(__dirname, 'public')));
+    app.use(express_1.default.static(path_1.default.resolve('./public')));
     // use cors
     app.use((0, cors_1.default)({ origin: '*' }));
-    app.use('/', index_1.default);
+    app.use('/api/', index_1.default);
     app.use('/categories', categories_1.default);
-    app.use('/products', products_1.default);
+    app.use('/tables', tables_1.default);
+    app.use('/users', users_1.default);
+    app.use('/carts', carts_1.default);
+    app.use('/address', address_1.default);
+    app.use('/promotions', promotions_1.default);
+    app.use('/payments', payments_1.default);
     app.use('/suppliers', suppliers_1.default);
+    app.use('/products', products_1.default);
     app.use('/orders', orders_1.default);
-    app.use('/advanced', advanced_1.default);
+    app.use('/auth', authentications_1.default);
     // catch 404 and forward to error handler
     app.use(function (req, res, next) {
         res.status(404).send('Not found');
