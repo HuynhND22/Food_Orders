@@ -11,5 +11,11 @@
             "src": "/(.*)",
             "dest": "/bin/www.ts"
         }
+    ],
+    "rewrites": [
+        {
+            "source": "/(.*)",
+            "destination": "/"
+        }
     ]
 }
