@@ -26,10 +26,10 @@ const getAll = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
-const getById = async (req: Request, res: Response, next: NextFunction) => {
+const getByTableId = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const order = await orderRepository.findOne({ 
-            where: { orderId: parseInt(req.params.id) },
+        const order = await orderRepository.find({
+            where: { tableId: parseInt(req.params.id) },
             relations: ['orderDetails']
         });
         order ? res.status(200).json(order) : res.sendStatus(410)
@@ -207,7 +207,7 @@ const hardDelete = async (req: Request, res: Response, next: NextFunction) => {
 }
 
 export default {getAll, 
-                getById,
+                getByTableId,
                 create, 
                 update, 
                 softDelete,

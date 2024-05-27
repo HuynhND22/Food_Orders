@@ -48,13 +48,13 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         let data = req.body;
         let simpleName = convertToSimpleString(req.body.name);
         const table = new Table();
-        data['qrCode'] =  `./public/qrCodes/tables/${simpleName}.png`;
-        data['uriCode'] =  base64Url.encode(simpleName);
+        data['qrCode'] =  `/qrCode/tables/${simpleName}.png`;
+        data['uriCode'] =  base64Url.encode(req.body.name);
 
         Object.assign(table, data);
         await repository.save(table);
 
-        await QRCode.toFile(`./public/upload/tables/${simpleName}.png`, `${process.env.HOST_CLIENT}/tables/${data['urlCode']}`, {
+        await QRCode.toFile(`./public/qrCode/tables/${simpleName}.png`, `${process.env.HOST_CLIENT}/tables/${data['uriCode']}`, {
             errorCorrectionLevel: 'H'
           }, function(err:any) {
             if (err) throw err;
@@ -85,15 +85,15 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 
         if(req.body.name) {
             try {
-                data['qrCode'] =  `./public/upload/tables/${simpleName}.png`;
-                data['urlCode'] =  base64Url.encode(simpleName);
-                await QRCode.toFile(`./public/upload/tables/${simpleName}.png`, `${process.env.HOST_CLIENT}/tables/${data['urlCode']}`, {
+                data['qrCode'] =  `./qrCode/tables/${simpleName}.png`;
+                data['uriCode'] =  base64Url.encode(simpleName);
+                await QRCode.toFile(`./public/qrCode/tables/${simpleName}.png`, `${process.env.HOST_CLIENT}/tables/${data['uriCode']}`, {
                     errorCorrectionLevel: 'H'
                   }, function(err:any) {
                     if (err) throw err;
                     console.log('QR code saved!');
                   });
-                await unlink(table.qrCode, (err) => {
+                await unlink(`./public/${table.qrCode}`, (err) => {
                     if(err) throw err;
                     console.log('unlinked');
                 })
@@ -173,6 +173,18 @@ const hardDelete = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+const getbyName = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const table = await repository.findOneBy({ name: req.params.name });
+        console.log(table);	
+        if (!table) {
+            return res.status(410).json({ error: 'Not found' });
+        }
+        return res.json(table);
+    } catch (error) {
+        console.log(error);	
+    }
+}
 
 const checkTableUnique = async (req:Request, res:Response) => {
     const {value, ignore, field} = req.query;
@@ -190,4 +202,4 @@ const checkTableUnique = async (req:Request, res:Response) => {
     }
 }
 
-export default {getAll, getById, create, update, softDelete, getDeleted, restore, hardDelete, checkTableUnique}
+export default {getAll, getById, create, update, softDelete, getDeleted, restore, hardDelete, checkTableUnique, getbyName}

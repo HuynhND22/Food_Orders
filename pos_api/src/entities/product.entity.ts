@@ -56,7 +56,7 @@ export class Product extends BaseEntity {
   })
   supplier: Supplier;
 
-  @OneToMany(() => Image, (i) => i.product)
+  @OneToMany(() => Image, (i) => i.product, { cascade: true })
   images: Image[];
 
   @OneToMany(() => ProductSize, (s) => s.product)

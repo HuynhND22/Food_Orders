@@ -21,7 +21,7 @@ export default function Nav() {
   });
 
   return (
-    <Box className="sticky w-auto right-0 left-0 bottom-0 transition-transform">
+    <Box className="fixed w-auto right-0 left-0 bottom-0 transition-transform">
       <BottomNavigation
         showLabels
         value={value}

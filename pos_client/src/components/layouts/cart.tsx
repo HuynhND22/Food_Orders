@@ -10,7 +10,8 @@ import axiosClient from "../../../configs/axiosClient";
 export default function Cart() {
   const [drawer, setDrawer] = React.useState(false);
   const [data, setData] = React.useState([]);
-
+  const tmp: any = localStorage.getItem("table");
+  const table = JSON.parse(tmp);
   const columns = [
     {
       title: "Món",
@@ -67,7 +68,9 @@ export default function Cart() {
   React.useEffect(() => {
     const getData = async () => {
       try {
-        const response: any = await axiosClient.get("/carts/id/3");
+        const response: any = await axiosClient.get(
+          `/carts/id/${table.tableId}`
+        );
         const filteredData = response.data.map((item: any) => {
           const name = item.productSizes
             ? item.productSizes.product.name
@@ -94,21 +97,6 @@ export default function Cart() {
     };
     getData();
   }, []);
-
-  const dataSource = [
-    {
-      key: "1",
-      name: "Mì cay kim chi",
-      quantity: 2,
-      price: 55000,
-    },
-    {
-      key: "2",
-      name: "Pepsi",
-      quantity: 2,
-      price: 15000,
-    },
-  ];
 
   return (
     <div>

@@ -4,7 +4,7 @@ import { Product } from "../entities/product.entity";
 import { Image } from "../entities/image.entity";
 import { handleUniqueError } from "../helpers/handleUniqueError";
 import { ProductSize } from "../entities/productSize.entity";
-import { unlink } from "fs";
+import fs from "fs";
 import { IsNull, Not } from "typeorm";
 import checkUnique from "../helpers/checkUnique";
 // import { upload } from "../helpers/uploadFile";
@@ -15,7 +15,7 @@ const repository = AppDataSource.getRepository(Product);
 
 const getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const products = await repository.find();
+        const products = await repository.find({relations: ['images']});
         if (products.length === 0) {
             return res.status(204).send({
                 error: "No content",
@@ -30,7 +30,7 @@ const getAll = async (req: Request, res: Response, next: NextFunction) => {
 
 const getById = async (req: Request, res: Response, next: NextFunction) => { 
     try {
-        const product = await repository.findOne({ 
+        const product = await repository.findOne({
             where: { productId: parseInt(req.params.id) },
             relations: ['category', 'supplier', 'status', 'productSizes.size', 'images'],
         });
@@ -52,8 +52,14 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             const result = await queryRunner.manager.save(Product, product);
 
             const storage = multer.diskStorage({
+                contentType: multer.AUTO_CONTENT_TYPE,
                 destination: function (req:Request, file:any, cb:Function) {
-                  return cb(null, path.join(__dirname, '../../public/uploads/products/'));
+
+                    if (!fs.existsSync(`./public/uploads/products/${result.productId}`)) {
+                        // Create a directory
+                        fs.mkdirSync(`./public/uploads/products/${result.productId}`, { recursive: true });
+                      }
+                  return cb(null, path.join(__dirname, `./public/uploads/products/${result.productId}`));
                 },
                 filename: async function (req:Request, file:any, cb:Function) {
                     const images = product.images?.map((img:any) => {
@@ -115,22 +121,23 @@ const update = async (req:Request, res:Response, next: NextFunction) => {
             Object.entries(data).forEach(([key, value]:any) => {
                 product[key] = value;
             });
-
+            console.log(product)
             await queryRunner.manager.save(Product, product);
             
             const image = await queryRunner.manager.find(Image, {where: {productId: productId}});
             
             // console.log(image);	
             if(data.images){
-                Object.entries(image).forEach(([key, value]:any) => {
-                    let a = data.images.find((img:any) => img.uri == value.uri)
-                    if (!a) {
-                        queryRunner.manager.delete(Image, { uri: value.uri})
-                        unlink(value.uri, (err:any) => {
+
+                await Promise.all( image.map( async(value:any) => {
+                    const matchingItem = data.images.find((img:any) => img.uri == value.uri)
+                    if (!matchingItem) {
+                        queryRunner.manager.delete(Image, { imageId: value.imageId})
+                        fs.unlink(`public/${value.uri}`, (err:any) => {
                             if (err) throw err
                         })
                     }
-                });
+                }));
             }
 
             const storage = multer.diskStorage({
@@ -141,8 +148,8 @@ const update = async (req:Request, res:Response, next: NextFunction) => {
                     const images = product.images?.map((img:any) => {
                         return {...img, productId: productId, uri: '/uploads/products/'};
                     })
+                    console.log('fileNmae ' + path.extname(file.originalname));	
                     await queryRunner.manager.save(Image, images);
-
                     return cb(null, Date.now() + path.extname(file.originalname));
                 },
             });
@@ -158,7 +165,7 @@ const update = async (req:Request, res:Response, next: NextFunction) => {
 
 
             if (data.sizes) {
-                const currentSizes = await queryRunner.manager.find(ProductSize, { where: { productId } });
+                const currentSizes = await queryRunner.manager.find(ProductSize, { where: { productId: productId } });
 
                 await Promise.all(currentSizes.map(async (size: any) => {
                     const matchingItem = data.sizes.find((item: any) => item.productSizeId === size.productSizeId);

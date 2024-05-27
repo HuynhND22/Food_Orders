@@ -13,5 +13,6 @@ router.delete('/remove/:id', tableController.softDelete);
 router.get('/deleted/', tableController.getDeleted);
 router.post('/restore/:id', tableController.restore);
 router.get('/check/unique', tableController.checkTableUnique);
+router.get('/name/:name', tableController.getbyName);
 
 export default router;

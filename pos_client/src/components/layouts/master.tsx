@@ -18,7 +18,7 @@ export default function Master({ children }: any) {
     <main className=" bg-white relative rounded-lg">
       <Header />
 
-      <div className="bg-[#ffba00] w-[100%] h-18 sticky top-0 mt-16">
+      <div className="bg-[#ffba00] w-[100%] h-18 sticky top-0 mt-16 z-20">
         <Search placeholder="Tìm kiếm" className=" pb-4 p-5" />
       </div>
       <Layout>
