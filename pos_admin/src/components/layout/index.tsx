@@ -1,15 +1,15 @@
-
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
-import Categories from '../../pages/categories';
-import Suppliers from '../../pages/suppliers';
-import Products from '../../pages/products';
-import Orders from '../../pages/orders';
-import Promotions from '../../pages/promotions';
-import Users from '../../pages/users';
-import Styles from '../../styles/layout/layout.module.css'
-import { UserOutlined } from '@ant-design/icons';
-import { Avatar, Space } from 'antd';
+import React from "react";
+import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import Categories from "../../pages/categories";
+import Suppliers from "../../pages/suppliers";
+import Products from "../../pages/products";
+import Orders from "../../pages/orders";
+import Promotions from "../../pages/promotions";
+import Users from "../../pages/users";
+import Login from "../../pages/login";
+import Styles from "../../styles/layout/layout.module.css";
+import { UserOutlined } from "@ant-design/icons";
+import { Avatar, Space } from "antd";
 
 function Layout() {
   return (
@@ -17,12 +17,12 @@ function Layout() {
       <Router>
         <nav>
           <div>
-          <span>
-          <Space direction="vertical" size={10}>
-            <Space wrap size={16}></Space>
-            <Avatar size={64} icon={<UserOutlined />} />
-          </Space>
-          </span>
+            <span>
+              <Space direction="vertical" size={10}>
+                <Space wrap size={16}></Space>
+                <Avatar size={64} icon={<UserOutlined />} />
+              </Space>
+            </span>
           </div>
           <div className={Styles.item}>
             <Link to="/">Categories</Link>
@@ -31,6 +31,7 @@ function Layout() {
             <Link to="/orders">Orders</Link>
             <Link to="/promotions">Promotions</Link>
             <Link to="/users">Users</Link>
+            <Link to="/login">Login</Link>
           </div>
         </nav>
         <h1>Admin Management</h1>
@@ -42,6 +43,7 @@ function Layout() {
           <Route path="/orders" element={<Orders />} />
           <Route path="/promotions" element={<Promotions />} />
           <Route path="/users" element={<Users />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </Router>
     </div>
