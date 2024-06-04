@@ -17,6 +17,7 @@ import suppliersRouter from './routes/suppliers';
 import productsRouter from './routes/products';
 import ordersRouter from './routes/orders';
 import authRouter from './routes/authentications';
+import statusRouter from './routes/status';
 
 const app: Express = express();
 
@@ -45,6 +46,7 @@ AppDataSource.initialize().then(async () => {
   app.use('/products', productsRouter);
   app.use('/orders', ordersRouter);
   app.use('/auth', authRouter);
+  app.use('/status', statusRouter);
   app.use('/', indexRouter);
 
   // catch 404 and forward to error handler
