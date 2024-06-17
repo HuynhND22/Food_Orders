@@ -4,7 +4,7 @@ import { Request, Response, NextFunction } from "express";
 const tableSchema = object().shape({
     name: string().required('Name must be required'),
     seat: number().required('Seat must be required').typeError('Seat must be a number'),
-    statusId: number().required('Status must be required')
+    statusId: number().notRequired()
   });
 
 const validateTable = async (req: Request, res: Response, next: NextFunction) => {

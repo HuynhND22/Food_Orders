@@ -10,7 +10,11 @@ const wardRepository = AppDataSource.getRepository(Ward);
 
 const getProvinces = async (req: Request, res: Response) => {
     try {
-        const provinces = await provinceRepository.find();
+        const provinces = await provinceRepository.find({
+            order: {
+                name: 'ASC'
+            }
+        });
         if (provinces.length === 0) {
             return res.status(204).json({
                 error: 'No content',
@@ -27,7 +31,9 @@ const getProvinces = async (req: Request, res: Response) => {
 
 const getDistricts = async (req: Request, res: Response) => {
     try {
-        const districts = await districtRepository.find({where: {provinceId: parseInt(req.params.provinceId)}});
+        const districts = await districtRepository.find({where: {provinceId: parseInt(req.params.provinceId)}, order: {
+                name: 'ASC'
+            }});
         if (districts.length === 0) {
             return res.status(204).json({
                 error: 'No content',
@@ -44,7 +50,9 @@ const getDistricts = async (req: Request, res: Response) => {
 
 const getWards = async (req: Request, res: Response) => {
     try {
-        const wards = await wardRepository.find({where: {districtId: parseInt(req.params.districtId)}});
+        const wards = await wardRepository.find({where: {districtId: parseInt(req.params.districtId)}, relations: ['district.province'], order: {
+                name: 'ASC'
+            }});
         if (wards.length === 0) {
             return res.status(204).json({
                 error: 'No content',

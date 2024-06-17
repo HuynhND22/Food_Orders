@@ -161,6 +161,8 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
       });
       getProducts();
       createForm.resetFields();
+      setFileList([])
+      message.success('Thêm thành công!')
     } catch (error) {
       console.log('Error:', error);
     }
@@ -336,7 +338,7 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
       }
     },
     {
-      title: 'Actions',
+      title: 'Thao tác',
       dataIndex: 'actions',
       key: 'actions',
       width: '10%',

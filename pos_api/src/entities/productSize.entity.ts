@@ -27,14 +27,14 @@ export class ProductSize extends BaseEntity {
   @Check(`"discount" >= 0 AND "discount" <= 50`)
   discount: number;
 
-  @Column({type: 'int'})
+  @Column({type: 'int', default: 0})
   @Check('"stock" >= 0')
   stock: number;
 
   @DeleteDateColumn({nullable: true})
   deletedAt?: String;
 
-  @ManyToOne(() => Product, (p) => p.productSizes)
+  @ManyToOne(() => Product, (p) => p.productSizes, {onDelete: 'CASCADE'})
   @JoinColumn({
     name: 'productId'
   })
@@ -46,13 +46,13 @@ export class ProductSize extends BaseEntity {
   })
   size: Size;
 
-  @OneToMany(() => Cart, (c) => c.productSizes)
+  @OneToMany(() => Cart, (c) => c.productSizes, { onDelete: 'CASCADE' })
   cart: Cart;
 
   @OneToMany(() => PromotionDetail, (pmd) => pmd.productSize)
   promotionDetails: PromotionDetail[];
 
-  @OneToMany(() => OrderDetail, (od) => od.productSize)
+  @OneToMany(() => OrderDetail, (od) => od.productSize, { onDelete: 'CASCADE' })
   orderDetails: OrderDetail[];
 
   // HOOKS (AUTO VALIDATE)

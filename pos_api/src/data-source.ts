@@ -22,6 +22,7 @@ import { Ward } from './entities/ward.entity';
 import { ProductSize } from './entities/productSize.entity';
 import { ResetPassword } from './entities/resetPasswor.entity';
 import { ActivateUser } from './entities/activateUser.entity';
+import {BankInfomation} from './entities//bankInfomation.entity'
 
 import { checkCartsUnique } from './migrations/triggers/checkCartsUnique';
 import { join } from 'path';
@@ -53,7 +54,8 @@ export const AppDataSource = new DataSource({
     Order, 
     OrderDetail, 
     ResetPassword, 
-    ActivateUser
+    ActivateUser,
+    BankInfomation
   ],
   migrations: [
     // join(__dirname, '**', '*.\.{ts,js}')

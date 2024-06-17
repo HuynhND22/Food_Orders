@@ -30,6 +30,7 @@ const login = async (req: Request, res: Response) => {
                         return res.status(200).json({
                             token: token,
                             user: {
+                                id: user?.userId,
                                 email: user?.email,
                                 role: user?.role,
                                 name: `${user?.firstName} ${user?.lastName}`

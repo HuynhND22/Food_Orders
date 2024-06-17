@@ -7,6 +7,7 @@ import Orders from "../../pages/orders";
 import Promotions from "../../pages/promotions";
 import Users from "../../pages/users";
 import Tables from "../../pages/tables";
+import Banks from "../../pages/banks";
 import Styles from "../../styles/layout/layout.module.css";
 import { UserOutlined } from "@ant-design/icons";
 import {Avatar, Button, Space} from "antd";
@@ -41,6 +42,7 @@ function Layout() {
             <Link to="/orders">Đơn gọi món</Link>
             <Link to="/promotions">Khuyến mãi</Link>
             <Link to="/users">Người dùng</Link>
+            <Link to="/banks">Thông tin ngân hàng</Link>
             <Button onClick={()=>logout()}>Đăng xuất</Button>
           </div>
         </nav>
@@ -54,6 +56,7 @@ function Layout() {
           <Route path="/orders" element={<Orders />} />
           <Route path="/promotions" element={<Promotions />} />
           <Route path="/users" element={<Users />} />
+          <Route path="/banks" element={<Banks />} />
           <Route path="/not-permission" element={<NotPermisstion />} />
         </Routes>
       {/*</Router>*/}

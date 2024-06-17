@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Layout, theme } from "antd";
+import { Layout, theme, ConfigProvider  } from "antd";
 import Search from "antd/es/input/Search";
 import Header from "./header";
 import Nav from "./navMenu";
@@ -15,9 +15,15 @@ export default function Master({ children }: any) {
   } = theme.useToken();
 
   return (
-    <main className=" bg-white relative rounded-lg">
+ <ConfigProvider
+    theme={{
+      token: {
+        colorPrimary: '#ffba00',
+      },
+    }}
+  >
+    <main className=" bg-slate-400 relative rounded-lg">
       <Header />
-
       <div className="bg-[#ffba00] w-[100%] h-18 sticky top-0 mt-16 z-20">
         <Search placeholder="Tìm kiếm" className=" pb-4 p-5" />
       </div>
@@ -26,18 +32,20 @@ export default function Master({ children }: any) {
           <Layout
             style={{
               padding: "24px 0",
-              background: colorBgContainer,
               borderRadius: borderRadiusLG,
             }}
           >
             <Cart />
-            <Content style={{ padding: "0 24px", minHeight: 8000 }}>
-              <main>{children}</main>
+            <Content style={{ padding: "0 24px", minHeight: 800,
+             // background: '#F0FFF0'
+           }}>
+              <main className='pb-8'>{children}</main>
             </Content>
           </Layout>
         </Content>
         <Nav />
       </Layout>
     </main>
+      </ConfigProvider>
   );
 }

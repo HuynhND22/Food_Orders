@@ -10,7 +10,7 @@ const promotionRepository = AppDataSource.getRepository(Promotion);
 
 const getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const promotions = await promotionRepository.find();
+        const promotions = await promotionRepository.find({ relations: ['promotionDetails.productSize.product', 'promotionDetails.productSize.size'] });
         if (promotions.length === 0) {
             return res.status(204).send({
                 error: "No content",
@@ -26,7 +26,7 @@ const getAll = async (req: Request, res: Response, next: NextFunction) => {
 const getById = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const promotion = await promotionRepository.findOne({ 
-            where: { promotionId: parseInt(req.params.id) },
+            where: { promotionId: parseInt(req.params.id), statusId: 51 },
             relations: ['promotionDetails']
         });
         promotion ? res.status(200).json(promotion) : res.sendStatus(410)
@@ -145,7 +145,7 @@ const restore = async (req: Request, res: Response) => {
 
 const getDeleted = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const promotions = await promotionRepository.find({ withDeleted: true, where: { deletedAt: Not(IsNull()) }, relations: ['promotionDetails'] });
+        const promotions = await promotionRepository.find({ withDeleted: true, where: { deletedAt: Not(IsNull()) }, relations: ['promotionDetails.productSize.product', 'promotionDetails.productSize.size'] });
         if (promotions.length === 0) {
             return res.status(204).send({
                 error: 'No content'
@@ -190,6 +190,22 @@ const checkPromotionUnique = async (req: Request, res: Response, next: NextFunct
     } 
 }
 
+const client = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const promotions = await promotionRepository.find({where: {statusId: 51}, relations: ['promotionDetails.productSize.product', 'promotionDetails.productSize.size'] });
+        if (promotions.length === 0) {
+            return res.status(204).send({
+                error: "No content",
+            });
+        }
+        res.json(promotions);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+
+}
+
 export default {getAll, 
                 getById,
                 create, 
@@ -198,5 +214,6 @@ export default {getAll,
                 restore,
                 getDeleted, 
                 hardDelete, 
-                checkPromotionUnique
+                checkPromotionUnique,
+                client
             }

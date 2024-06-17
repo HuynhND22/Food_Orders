@@ -2,9 +2,9 @@ import {number, object, string} from 'yup';
 import { Request, Response, NextFunction } from "express";
 
 const orderSchema = object().shape({
-    tableId: number().required('TableId must be required').typeError('TableId must be a number'),
+    tableId: number().required('tableId must be required').typeError('TableId must be a number'),
     userId: number().typeError('UserId must be a number'),
-    statusId: number().typeError('StatusId must be a number').required('StatusId must be required'),
+    statusId: number().typeError('StatusId must be a number'),
     payment: string().typeError('Payment must be a string').required('Payment must be required').oneOf(['Tiền mặt', 'Ngân hàng'], 'Payment must be either "Tiền mặt" or "Ngân hàng"'),
   });
 

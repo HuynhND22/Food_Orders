@@ -10,7 +10,7 @@ const repository = AppDataSource.getRepository(Supplier);
 
 const getAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const suppliers = await repository.find();
+    const suppliers = await repository.find({relations: ['ward.district.province']});
     if (suppliers.length === 0) {
         return res.status(204).send({
           error: 'No content',
@@ -25,7 +25,7 @@ const getAll = async (req: Request, res: Response, next: NextFunction) => {
 
 const getById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const supplier = await repository.findOneBy({ supplierId: parseInt(req.params.id) });
+        const supplier = await repository.findOne({where: {supplierId: parseInt(req.params.id)}, relations: ['ward.district.province']});
         supplier ? res.json(supplier) : res.sendStatus(410);
     } catch (error) {
         console.log(error);
@@ -86,7 +86,7 @@ const softDelete = async (req: Request, res: Response, next: NextFunction) => {
 
 const getDeleted = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const suppliers = await repository.find({withDeleted: true, where: {deletedAt: Not(IsNull())}});
+        const suppliers = await repository.find({withDeleted: true, where: {deletedAt: Not(IsNull())}, relations: ['ward.district.province']});
         if (suppliers.length === 0) {
             return res.status(204).send({message: 'No content'});
         }

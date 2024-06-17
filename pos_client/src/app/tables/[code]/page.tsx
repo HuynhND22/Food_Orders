@@ -5,6 +5,7 @@ import base64url from "base64url";
 import axiosClient from "../../../../configs/axiosClient";
 import { useRouter } from "next/navigation";
 import { Spin } from "antd";
+import Cookies from "js-cookie";
 
 const Table = ({ params: { code } }: any) => {
   const router = useRouter();
@@ -18,24 +19,22 @@ const Table = ({ params: { code } }: any) => {
   axiosClient
     .get(`tables/name/${a}`)
     .then((response: any) => {
-      localStorage.setItem("table", JSON.stringify(response.data));
+      Cookies.set("table", JSON.stringify(response.data));
       router.push("/");
     })
     .catch((error: any) => {
+      Cookies.remove("table");
       router.push("/errors");
     });
-  console.log(localStorage.getItem("table"));
   return (
-    <div className="bg-[#ffba00]">
-      <Spin
-        tip="Chờ một chút..."
-        className="bg-[#ffba00]"
-        size="large"
-        fullscreen
-      >
-        {content}
-      </Spin>
-    </div>
+    <Spin
+      tip="Chờ một chút..."
+      // className="bg-[#ffba00]"
+      size="large"
+      fullscreen
+    >
+      {content}
+    </Spin>
   );
 };
 

@@ -13,13 +13,11 @@ export class Table extends BaseEntity {
   @Column({type: 'int', default: 2})
   seat: number;
   
-
   @Column({type: 'nvarchar', length:255, unique: true})
   name: string;
 
-  @Column({type: 'int'})
+  @Column({type: 'int', nullable:true})
   statusId?: number;
-  // @MaxLength(11)
 
   @Column({type: 'varchar', nullable:true})
   uriCode: string;
@@ -43,13 +41,13 @@ export class Table extends BaseEntity {
   })
   status: Status;
 
-  @OneToMany(() => Order, (o) => o.table)
+  @OneToMany(() => Order, (o) => o.table, { onDelete: 'CASCADE' })
   @JoinColumn({
     name: 'tableId'
   })
   orders: Order[];
 
-  @OneToMany(() => Cart, (s) => s.table)
+  @OneToMany(() => Cart, (s) => s.table,{ onDelete: 'CASCADE' })
   carts: Cart[];
 
   // HOOKS (AUTO VALIDATE)

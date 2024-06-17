@@ -39,6 +39,7 @@ export default function Promotions({ }: Props) {
     const getPromotions = async () => {
         try {
             const response = await axiosClient.get(`/promotions/${deleted}`);
+            console.log(response.data);  
             setPromotions(response.data);
         } catch (error) {
             console.log('Error:', error);
@@ -155,7 +156,7 @@ export default function Promotions({ }: Props) {
             width: '10%',
             render: (text:string, record:any) => {
                 return status.map((value:any)=>{
-                    return value.statusId == record.statusId ? value.name : null
+                    return value.statusId == record.statusId ? value?.name : null
                 })
             }
         },
@@ -169,7 +170,7 @@ export default function Promotions({ }: Props) {
                     key: 'productSizeId',
                     render: (text:string, record:any)=>{
                         return record?.promotionDetails.map((value:any, index:number)=>{
-                            return <div key={index}>{`[${value.quantity}]${value.productSize?.product.name}[${value.productSize?.size.name}]`}</div>
+                            return <div key={index}>{`[${value.quantity}]${value.productSize?.product?.name}[${value.productSize?.size?.name}]`}</div>
                         })
                     },
                     width: '20%'
@@ -200,7 +201,7 @@ export default function Promotions({ }: Props) {
           }
         },
           {
-          title: 'Actions',
+          title: 'Thao tác',
           dataIndex: 'actions',
           key: 'actions',
           width: '1%',

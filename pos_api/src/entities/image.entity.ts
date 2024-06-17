@@ -19,10 +19,9 @@ export class Image extends BaseEntity {
   @Column({type: 'bit'})
   cover: boolean;
 
-  @ManyToOne(() => Product, (p) => p.images)
+  @ManyToOne(() => Product, (p) => p.images, { onDelete: 'CASCADE' })
   @JoinColumn({
     name: 'productId',
-    // referencedColumnName: 'productId'
   })
   product: Product;
 

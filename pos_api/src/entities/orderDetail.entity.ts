@@ -43,7 +43,7 @@ export class OrderDetail extends BaseEntity {
   })
   order: Order;
 
-  @ManyToOne(() => ProductSize, (p) => p.orderDetails)
+  @ManyToOne(() => ProductSize, (p) => p.orderDetails, { onDelete: 'CASCADE' })
   @JoinColumn({
     name: 'productSizeId',
     referencedColumnName: 'productSizeId'

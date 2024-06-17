@@ -27,7 +27,9 @@ const getStatus = async (req: Request, res: Response) => {
             case 'promotions':
                 status = await statusRepository.find({where: {statusId: Between(50, 59)}});
                 break;
-
+            case 'suppliers':
+                status = await statusRepository.find({where: {statusId: Between(60, 69)}});
+                break;
             default:
                 return res.sendStatus(400);
         }

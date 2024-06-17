@@ -3,11 +3,7 @@ import { IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
 import { Category } from './category.entity';
 import { Image } from './image.entity';
 import { Supplier } from './supplier.entity';
-import { Order } from './order.entity';
-import { OrderDetail } from './orderDetail.entity';
-import { Cart } from './cart.entity';
 import { Status } from './status.entity';
-import { PromotionDetail } from './promotionDetail.entity';
 import { ProductSize } from './productSize.entity';
 
 @Entity({ name: 'Products' })
@@ -56,10 +52,10 @@ export class Product extends BaseEntity {
   })
   supplier: Supplier;
 
-  @OneToMany(() => Image, (i) => i.product, { cascade: true })
+  @OneToMany(() => Image, (i) => i.product, { onDelete: 'CASCADE' })
   images: Image[];
 
-  @OneToMany(() => ProductSize, (s) => s.product)
+  @OneToMany(() => ProductSize, (s) => s.product, { onDelete: 'CASCADE' })
   productSizes: ProductSize[];
 
   // @ManyToMany(

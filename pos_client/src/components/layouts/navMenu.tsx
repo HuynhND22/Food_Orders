@@ -36,13 +36,13 @@ export default function Nav() {
           href="/"
         />
         <BottomNavigationAction
-          label={"Danh mục"}
+          label={"Món ăn"}
           icon={<BsList />}
           LinkComponent={Link}
           href="/categories"
         />
         <BottomNavigationAction
-          label={"Đơn hàng"}
+          label={"Đơn món"}
           icon={<BsPerson />}
           LinkComponent={Link}
           href="/orders"

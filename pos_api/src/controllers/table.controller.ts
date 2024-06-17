@@ -85,8 +85,9 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 
         if(req.body.name) {
             try {
-                data['qrCode'] =  `./qrCode/tables/${simpleName}.png`;
-                data['uriCode'] =  base64Url.encode(simpleName);
+                data['qrCode'] =  `/qrCode/tables/${simpleName}.png`;
+                data['uriCode'] =  base64Url.encode(req.body.name);
+                console.log(data['uriCode']);	
                 await QRCode.toFile(`./public/qrCode/tables/${simpleName}.png`, `${process.env.HOST_CLIENT}/tables/${data['uriCode']}`, {
                     errorCorrectionLevel: 'H'
                   }, function(err:any) {
@@ -202,4 +203,14 @@ const checkTableUnique = async (req:Request, res:Response) => {
     }
 }
 
-export default {getAll, getById, create, update, softDelete, getDeleted, restore, hardDelete, checkTableUnique, getbyName}
+const downloadImage = async (req:Request, res:Response) => {
+    const {uri} = req.query;
+    try {
+        res.download(`./public/${uri}`);
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+}
+
+export default {getAll, getById, create, update, softDelete, getDeleted, restore, hardDelete, checkTableUnique, getbyName, downloadImage}

@@ -18,13 +18,21 @@ const getByTableId = async (req: Request, res: Response, next: NextFunction) => 
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        let {productSizeId, promotionId, quantity, tableId} = req.body;
         let data = req.body;
-        
-        const cart = new Cart();
-        Object.assign(cart, data);
-        await repository.save(cart);
+        const found = await repository.findOne({where: {productSizeId: productSizeId, promotionId: promotionId}})
+        if (found) {
+            Object.assign(found, {quantity: found.quantity + quantity});
+            console.log(found);
+            await repository.save(found);
+            return res.status(201).json(found)
+        } else {
+            const cart = new Cart();
+            Object.assign(cart, data);
+            await repository.save(cart);
+            return res.status(201).json('cart');
+        }        
 
-        return res.status(201).json(cart);
     } catch (error: any) {
         if(error.number === 2627) {
             return res.status(400).json({ error: 'Cart already exists' });
@@ -35,7 +43,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 }
 
 const update = async (req: Request, res: Response, next: NextFunction) => {
-    const quantity = Number(req.query.quantity);
+    const quantity = Number(req.body.quantity);
     const cartId = parseInt(req.params.id)
 
     const cart = await repository.findOneBy({ cartId: cartId });

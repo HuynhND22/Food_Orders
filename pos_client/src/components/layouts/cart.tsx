@@ -1,17 +1,25 @@
 "use client";
 
-import { Button, Drawer, FloatButton, InputNumber, Table } from "antd";
+import { Button, Drawer, FloatButton, InputNumber, Table, message, Segmented } from "antd";
 import React from "react";
 import { BsCart } from "react-icons/bs";
 import { RiDeleteBin5Line } from "react-icons/ri";
+import { useRouter } from "next/navigation";
 import { TiMinus, TiPlus } from "react-icons/ti";
 import axiosClient from "../../../configs/axiosClient";
+import Cookies from "js-cookie";
+import { debounce } from "lodash";
 
 export default function Cart() {
   const [drawer, setDrawer] = React.useState(false);
   const [data, setData] = React.useState([]);
-  const tmp: any = localStorage.getItem("table");
-  const table = JSON.parse(tmp);
+  const [refresh, setRefresh] = React.useState(true);
+  const [price, setPrice] = React.useState(0);
+  const [payment, setPayment] = React.useState('Tiền mặt');
+  const cookieStore: any = Cookies.get("table");
+  const table: any = cookieStore ? JSON.parse(cookieStore) : null;
+  const router = useRouter();
+
   const columns = [
     {
       title: "Món",
@@ -23,80 +31,143 @@ export default function Cart() {
       dataIndex: "quantity",
       key: "quantity",
       render: (text: any, record: any, index: any) => {
-        return (
-          <span className="flex gap-1">
-            <Button size="small">
-              <TiMinus size={10} />
-            </Button>
-            <InputNumber
-              className="w-[100%]"
-              min={0}
-              max={99}
-              size="small"
-              defaultValue={record.quantity}
-              itemType="number"
-            />
-            <Button size="small">
-              <TiPlus size={10} />
-            </Button>
-          </span>
-        );
+        return <ProductItem key={index} product={record} />;
       },
     },
     {
       title: "Giá tiền",
       dataIndex: "price",
       key: "price",
-    },
-    {
-      // title: "",
-      dataIndex: "action",
-      key: "action",
       render: (text: any, record: any, index: any) => {
         return (
-          <span className="w-0">
-            <Button size="small" type="text">
+          <div>
+            <span>{record.price.toLocaleString("vi-VN") + "đ"}</span>
+            <span className="w-0">
+            <Button size="small" type="text" onClick={()=>{
+              axiosClient.patch(`/carts/update/${record.cartId}`, {quantity: 0})
+              setRefresh(!refresh)
+            }}>
               <RiDeleteBin5Line />
             </Button>
           </span>
-        );
+          </div>
+        )
       },
-      width: 1,
-    },
+      width: '20%'
+    }
   ];
 
-  React.useEffect(() => {
-    const getData = async () => {
-      try {
-        const response: any = await axiosClient.get(
-          `/carts/id/${table.tableId}`
-        );
-        const filteredData = response.data.map((item: any) => {
-          const name = item.productSizes
-            ? item.productSizes.product.name
-            : item.promotion.name;
-          const price = item.promotion
-            ? item.promotion.price
-            : item.productSizes.price *
-              (1 - item.productSizes.discount / 100) *
-              item.quantity;
-          return {
-            name: name,
-            quantity: item.quantity,
-            price: price,
-            total: +price,
-          };
-        });
+  const getData = async () => {
+    try {
+      const response: any = await axiosClient.get(`/carts/id/${table.tableId}`);
+      console.log(response.data);  
+      const filteredData = response.data.map((item: any) => {
+        const name = item.productSizes
+          ? item.productSizes.product.name + ' ' + item.productSizes.size.name
+          : item.promotion.name;
+        const price = item.promotion
+          ? item.promotion.price
+          : item.productSizes.price *
+            (1 - item.productSizes.discount / 100) *
+            item.quantity;
+        return {
+          cartId: item.cartId,
+          name: name,
+          quantity: item.quantity,
+          price: price
+        };
+      });
+      // console.log(filteredData);  
+      setData(filteredData);
 
-        setData(filteredData);
-      } catch (error) {
-        console.log("Failed to fetch data: ", error);
-      } finally {
-        // setLoading(false);
+      const totalPrice = filteredData.reduce(
+        (accumulator: any, currentValue: any) =>
+          accumulator + currentValue.price,
+        0
+      );
+      setPrice(totalPrice);
+    } catch (error) {
+      console.log("Failed to fetch data: ", error);
+    } finally {
+      // setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    getData();
+  }, [refresh]);
+
+const ProductItem = ({ product }: any) => {
+    const [quantity, setQuantity] = React.useState(product.quantity);
+
+    const handleIncrease = () => {
+      if (quantity < 99) {
+        setTimeout(() => {
+          setRefresh(!refresh)
+        }, 1000);
+        setQuantity(quantity + 1);
       }
     };
-    getData();
-  }, []);
+
+    const handleDecrease = () => {
+      if (quantity > 0) {
+        setTimeout(() => {
+          setRefresh(!refresh)
+        }, 1000);
+        setQuantity(quantity - 1);
+      }
+    };
+    React.useEffect(() => {
+      const updateCart = debounce(async () => {
+        try {
+          await axiosClient.patch(`/carts/update/${product.cartId}`, {
+            quantity: quantity,
+          });
+        } catch (error) {
+          console.log("Failed to fetch data: ", error);
+        }
+      }, 500);
+      updateCart();
+    });
+
+    return (
+      <span className="flex gap-1">
+        <Button size="small" onClick={handleDecrease}>
+          <TiMinus size={10} />
+        </Button>
+        <InputNumber
+          onChange={(value:number) => {
+            setQuantity(value)
+            setTimeout(() => {
+              setRefresh(!refresh)
+            }, 1000);
+          }}
+          className="w-[40px]"
+          min={0}
+          max={99}
+          size="small"
+          value={quantity}
+          type="number"
+        />
+        <Button size="small" onClick={handleIncrease}>
+          <TiPlus size={10} />
+        </Button>
+      </span>
+    );
+  };
+
+  const createOrder = async () => {
+    try {
+      // console.log({tableId: table.tableId, payment: payment});  
+      const response = await axiosClient.post('/orders/create', {tableId: table.tableId, payment: payment})
+      console.log(response.data);  
+      message.success('Đặt món thành công!')
+      router.push(`/orders/details/${response.data.orderId}`)
+    } catch (error) {
+      console.log(error);
+      message.error('Đặt món thất bại')  
+    }
+  }
 
   return (
     <div>
@@ -118,25 +189,36 @@ export default function Cart() {
                   <b>Tổng cộng</b>
                 </Table.Summary.Cell>
                 <Table.Summary.Cell index={3} className="">
-                  {data.map((item: any) => {
-                    return 0;
-                  })}
+                  {price.toLocaleString("vi-VN") + "đ"}
                 </Table.Summary.Cell>
               </Table.Summary.Row>
             )}
           />
         </div>
-        <div className="flex p-3">
-          <Button
-            type="primary"
-            className="right-0 flex-grow"
-            onClick={async () => {
-              // console.log(filteredData);
-            }}
-          >
-            Đặt món
-          </Button>
+        { data[0] &&
+        <div>
+          <div className='flex p-4 gap-4 justify-between'>
+            <div className='font-bold'>
+                Thanh toán:
+            </div>
+            <Segmented<string>
+                options={['Tiền mặt', 'Ngân hàng']}
+                onChange={(value:any) => {
+                  setPayment(value)
+                }}
+              />
+          </div>
+          <div className="flex p-3">
+            <Button
+              type="primary"
+              className="right-0 flex-grow"
+              onClick={createOrder}
+            >
+              Đặt món
+            </Button>
+          </div>
         </div>
+        }
       </Drawer>
     </div>
   );

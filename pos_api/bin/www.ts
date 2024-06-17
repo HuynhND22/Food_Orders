@@ -4,7 +4,7 @@
  * Module dependencies.
  */
 
-import app from '../src/app';
+import app, { initSocketIO } from '../src/app';
 const debug = require('debug')('express-typescript:server');
 import http from 'http';
 
@@ -24,6 +24,9 @@ const server = http.createServer(app);
 /**
  * Listen on provided port, on all network interfaces.
  */
+
+// Khởi tạo Socket.IO
+const io = initSocketIO(server);
 
 server.listen(port);
 server.on('error', onError);

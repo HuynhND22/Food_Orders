@@ -13,7 +13,11 @@ const orderRepository = AppDataSource.getRepository(Order);
 
 const getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const orders = await orderRepository.find();
+        const orders = await orderRepository.find({ order: {
+                createdAt: 'DESC'
+            },
+            relations: ['orderDetails.productSize.product', 'orderDetails.productSize.size', 'orderDetails.promotion', 'status', 'table']
+        });
         if (orders.length === 0) {
             return res.status(204).send({
                 error: "No content",
@@ -26,11 +30,26 @@ const getAll = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+const getById = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const order = await orderRepository.findOne({
+            where: { orderId: parseInt(req.params.id) },
+            relations: ['orderDetails.productSize.product', 'orderDetails.productSize.size', 'orderDetails.promotion', 'status']});
+        order ? res.status(200).json(order) : res.sendStatus(410)
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+}
+
 const getByTableId = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const order = await orderRepository.find({
             where: { tableId: parseInt(req.params.id) },
-            relations: ['orderDetails']
+            relations: ['orderDetails'],
+            order: {
+                createdAt: 'DESC'
+            }
         });
         order ? res.status(200).json(order) : res.sendStatus(410)
     } catch (error) {
@@ -46,41 +65,38 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 
         await queryRunner.startTransaction();
         try {
-                const order = req.body;
-                const result = await queryRunner.manager.save(Order, order);
+            const order = req.body;
+            const result = await queryRunner.manager.save(Order, order);
 
-                const carts = await queryRunner.manager.find(Cart, {where: {tableId: order.tableId}})
-                const orderDetails = [];
-                for (const od of carts) {
-                    if (od.productSizeId) {
-                        let productSize = await queryRunner.manager.findOne(ProductSize, {where: { productSizeId: od.productSizeId}});
-                        if (productSize) {
-                            orderDetails.push({...od, orderId: result.orderId, price: productSize.price, discount: productSize.discount})
-                        }
+            const carts = await queryRunner.manager.find(Cart, {where: {tableId: order.tableId}})
+            const orderDetails = [];
+            for (const od of carts) {
+                if (od.productSizeId) {
+                    let productSize = await queryRunner.manager.findOne(ProductSize, {where: { productSizeId: od.productSizeId}});
+                    if (productSize) {
+                        orderDetails.push({...od, orderId: result.orderId, price: productSize.price, discount: productSize.discount})
                     }
-
-                    if (od.promotionId) {
-                        let promotion = await queryRunner.manager.findOne(Promotion, {where: { promotionId: od.promotionId}});
-                        if (promotion) {
-                            orderDetails.push({...od, orderId: result.orderId, price: promotion.price})
-                        }
-                    }
-                    await queryRunner.manager.delete(Cart, od.cartId);
                 }
 
-                try {
-                    await queryRunner.manager.save(OrderDetail, orderDetails);
-                } catch (error) {
-                    console.log(error);
-                    return res.json(error);
+                if (od.promotionId) {
+                    let promotion = await queryRunner.manager.findOne(Promotion, {where: { promotionId: od.promotionId}});
+                    if (promotion) {
+                        orderDetails.push({...od, orderId: result.orderId, price: promotion.price})
+                    }
                 }
-
-                await queryRunner.commitTransaction();
-            if (result.payment == "Ngân hàng") {
-                return res.redirect(`/payments/handler/${result.orderId}`);
-            } else {
-                return res.redirect(`/orders/id/${result.orderId}`);
+                await queryRunner.manager.delete(Cart, od.cartId);
             }
+
+            try {
+                await queryRunner.manager.save(OrderDetail, orderDetails);
+            } catch (error) {
+                console.log(error);
+                return res.json(error);
+            }
+
+            await queryRunner.commitTransaction();
+            return res.redirect(`/orders/id/${result.orderId}`);
+            
         } catch (error) {
             await queryRunner.rollbackTransaction();
             console.log(error);
@@ -107,13 +123,11 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
         await queryRunner.startTransaction();
         try {
             const order = req.body;
-            const found = await queryRunner.manager.findOne(Order, { where: { orderId: parseInt(req.params.id)} });
-            console.table(found);
+            const found:any = await queryRunner.manager.findOne(Order, { where: { orderId: parseInt(req.params.id)} });           
             if (found) {
-                found.tableId = order.tableId;
-                found.userId = order.userId;
-                found.statusId = order.statusId;
-                found.payment = order.payment;
+                Object.entries(order).forEach(([key, value]:any) => {
+                    found[key] = value;
+                });
             } else {
                 return res.sendStatus(410).json(found);
             }
@@ -147,6 +161,20 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+const cancel = async (req:Request, res:Response) => {
+    try {
+        const id = parseInt(req.params.id)
+        const found = await orderRepository.findOneBy({orderId: id})
+        if (!found) return res.status(410).json({error: 'not found'})
+        Object.assign(found, {statusId: 13});
+        await orderRepository.save(found);
+        return res.sendStatus(200)
+    } catch (error) {
+        console.log(error);    
+        return res.status(500).json({error: 'Internal server error'})
+    }
+} 
+
 const softDelete = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const order = await orderRepository.findOneBy({ orderId: parseInt(req.params.id) });
@@ -177,7 +205,9 @@ const restore = async (req: Request, res: Response) => {
 
 const getDeleted = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const orders = await orderRepository.find({ withDeleted: true, where: { deletedAt: Not(IsNull()) }, relations: ['orderDetails'] });
+        const orders = await orderRepository.find({ withDeleted: true, where: { deletedAt: Not(IsNull()) }, relations: ['orderDetails'],  order: {
+                deletedAt: 'DESC'
+            } });
         if (orders.length === 0) {
             return res.status(204).send({
                 error: 'No content'
@@ -207,9 +237,11 @@ const hardDelete = async (req: Request, res: Response, next: NextFunction) => {
 }
 
 export default {getAll, 
+                getById,
                 getByTableId,
                 create, 
                 update, 
+                cancel,
                 softDelete,
                 restore,
                 getDeleted, 

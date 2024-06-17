@@ -31,7 +31,7 @@ export class Promotion extends BaseEntity {
   endDate: string;
 
   @Column({type: 'int'})
-  statusId: string;
+  statusId: number;
 
   @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
   createdAt: String;

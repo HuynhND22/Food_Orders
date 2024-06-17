@@ -15,7 +15,7 @@ export class Status extends BaseEntity {
   @PrimaryColumn({ type: 'int' })
   statusId: number;
 
-  @Column({type: 'nvarchar', length:255, unique: true})
+  @Column({type: 'nvarchar', length:255})
   name: string;
 
   @OneToMany(() => User, (u) => u.status)

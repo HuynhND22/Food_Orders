@@ -14,6 +14,6 @@ router.get('/deleted/', promotionController.getDeleted);
 router.post('/restore/:id', promotionController.restore);
 router.delete('/delete/:id', promotionController.hardDelete);
 router.get('/check/unique', promotionController.checkPromotionUnique);
-
+router.get('/client', promotionController.client);
 
 export default router;

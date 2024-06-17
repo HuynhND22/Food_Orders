@@ -26,7 +26,7 @@ export class Cart extends BaseEntity {
   @JoinColumn({name: 'tableId', referencedColumnName: 'tableId'})
   table: Table;
 
-  @ManyToOne(() => ProductSize, (p) => p.cart)
+  @ManyToOne(() => ProductSize, (p) => p.cart, { onDelete: 'CASCADE' })
   @JoinColumn({name: 'productSizeId'})
   productSizes: ProductSize[];
 

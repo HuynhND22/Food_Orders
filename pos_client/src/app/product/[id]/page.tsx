@@ -3,23 +3,43 @@
 import React from "react";
 import axiosClient from "../../../../configs/axiosClient";
 import { useRouter } from "next/navigation";
-import { Carousel, Divider, Image, Radio, RadioChangeEvent } from "antd";
+import {TiMinus, TiPlus} from 'react-icons/ti';
+import {ShoppingCartOutlined, CheckCircleOutlined, CloseCircleOutlined} from '@ant-design/icons';
+import { Carousel, Divider, Image, Radio, RadioChangeEvent, Card, Button, Form, InputNumber, ConfigProvider, message, notification } from "antd";
 import Nav from "@/components/layouts/navMenu";
+import withQRCode from "@/utils/withQRCode";
+import Cookie from 'js-cookie'
 
 const Product = ({ params: { id } }: any) => {
   const [product, setProduct] = React.useState<any>([]);
-  React.useEffect(() => {
-    const getProduct = async () => {
-      try {
-        const response = await axiosClient.get(`/products/id/${id}`);
-        console.log(response.data);
-        setProduct(response.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
+  const [related, setRelated] = React.useState<any>([]);
+  const [sizes, setSiezs] = React.useState<any>([]);
+  const [size, setSize] = React.useState<any>([]);
+  const [price, setPrice] = React.useState<any>();
+  const [cost, setCost] = React.useState<any>();
+  const [quantity, setQuantity] = React.useState(1);
+
+
+  const getProduct = async () => {
+    try {
+      const response = await axiosClient.get(`/products/id/${id}`);
+      setProduct(response.data);
+      const res = await axiosClient.get(`/products/category/${response.data.categoryId}`)
+      setRelated(res.data)
+      setSiezs(
+        response.data.productSizes.map((value: any) => {
+          return { label: value.size.name, value: value.productSizeId };
+        })
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  React.useEffect(() => {   
     getProduct();
+    console.log(product);  
   }, []);
+
   const router = useRouter();
   const contentStyle: React.CSSProperties = {
     margin: 15,
@@ -29,25 +49,15 @@ const Product = ({ params: { id } }: any) => {
     lineHeight: "150px",
     textAlign: "center",
     borderRadius: "20px",
-    background: "#364d79",
+    // background: "#F0FFF0",
   };
-  const [size, setSize] = React.useState();
-  const [price, setPrice] = React.useState<any>();
-  const [cost, setCost] = React.useState<any>();
-
-  const sizeData = product?.productSizes?.map((size: any) => {
-    return {
-      label: size.size.name,
-      value: size.sizeId,
-      disabled: size.stock === 0 ? true : false,
-    };
-  });
 
   const handlePrice = ({ target: { value } }: RadioChangeEvent) => {
     console.log("radio4 checked", value);
+    setSize(value);
     Object.entries(product.productSizes).filter((item: any) => {
-      // console.log(item[1].sizeId);
-      if (item[1].sizeId === value) {
+      console.log(item);  
+      if (item[1].productSizeId === value) {
         if (item[1].discount == 0) {
           setPrice(item[1].price);
           setCost(null);
@@ -57,12 +67,43 @@ const Product = ({ params: { id } }: any) => {
         }
       }
     });
-    setSize(value);
   };
 
+  const onCreate = async (value:any) => {
+    const table:any = Cookie.get('table')
+    value['quantity'] = quantity
+    value['tableId'] = JSON.parse(table).tableId
+    
+    console.log(value);  
+    try {
+      await axiosClient.post('carts/create', value)
+      notification.info({
+      message: `Thành công`,
+      description: 'Đã thêm món của bạn vào giỏ hàng!',
+      placement: 'topRight',
+      icon: <CheckCircleOutlined style={{ color: '#58c621' }} />,  
+    });
+    } catch (error) {
+      notification.info({
+      message: `Lỗi`,
+      description: 'Không thể thêm sản phẩm vào giỏ hàng!',
+      placement: 'topRight',
+      icon: <CloseCircleOutlined style={{ color: '#f81d22' }} />,  
+    });
+      console.log(error);  
+    }
+  }
+
   return (
-    <main className=" bg-white rounded-lg fixed left-0 right-0 top-0 bottom-0 text-slate-950 p-5">
-      <div className="text-center text-slate-950 p-3">Chi tiết món</div>
+     <ConfigProvider
+    theme={{
+      token: {
+        colorPrimary: '#ffba00',
+      },
+    }}
+  >
+    <main className=" bg-[#F5F5F5] rounded-lg border-8 border-white-500 relative rounded-lg fixed left-0 right-0 top-0 bottom-0 text-slate-950 p-5">
+      <div className="text-center bg-[#ffba00] rounded-sm font-bold text-slate-950 py-3 text-white">Chi tiết món</div>
       <div className="">
         <Carousel arrows>
           {product.images?.map((image: any) => {
@@ -82,32 +123,100 @@ const Product = ({ params: { id } }: any) => {
         </Carousel>
       </div>
       <Divider />
-      <div>
-        <p className="font-bold text-lg">{product.name}</p>
-      </div>
-      <div className="flex gap-7">
-        <span className="text-lg ">Size </span>
-        <Radio.Group
-          options={sizeData}
-          onChange={handlePrice}
-          value={size}
-          optionType="button"
-          buttonStyle="solid"
-        />
-      </div>
-      {price && (
+      <Form name='addToCart' onFinish={(value:any)=>onCreate(value)}>
         <div>
-          Giá: {cost && <del>{cost}đ</del>}
-          <span className="text-red-600 font-bold"> {price}đ</span>
+          <p className="font-bold text-lg">{product.name}</p>
         </div>
-      )}
+        <div className='p-3'>
+          <div className="flex gap-7">
+            <Form.Item name='productSizeId' label='Size' rules={[{required: true, message: 'Vui lòng chọn size'}]}>
+            <Radio.Group
+              options={sizes}
+              onChange={handlePrice}
+              value={size}
+              optionType="button"
+              buttonStyle="solid"
+            />
+            </Form.Item>
+          </div>
+          {price && (
+            <div className='p-2'>
+              Giá: {cost && <del>{cost.toLocaleString("vi-VN", {minimumFractionDigits: 0})}đ</del>}
+              <span className="text-red-600 font-bold"> {price.toLocaleString("vi-VN", {minimumFractionDigits: 0})}đ</span>
+            </div>
+          )}
+          <Form.Item name='quantity' label='Số lượng'>
+          <span className="flex gap-1">
+          <Button size="small"
+            onClick={()=>{if(quantity>1) setQuantity(quantity - 1)}}
+          >
+            <TiMinus size={10} />
+          </Button>
+          <InputNumber
+            onChange={(value:number) => {
+              setQuantity(value)
+            }}
+            className="w-[40px]"
+            min={0}
+            max={99}
+            size="small"
+            value={quantity}
+            type="number"
+          />
+          <Button size="small" 
+            onClick={()=>{if(quantity<99)setQuantity(quantity + 1)}}
+          >
+            <TiPlus size={10} />
+          </Button>
+          </span>
+            </Form.Item>
+          <div className='py-5 flex justify-center'>
+            <Button type='primary' icon={<ShoppingCartOutlined />} htmlType="submit">
+              Thêm vào giỏ hàng
+            </Button>
+          </div>
+        </div>
+      </Form>
+
       <Divider />
-      <div>
-        <span className="text-lg mt-10">Mô tả: {product.description}</span>
+      <span className='inline-block'>
+        {product.description && <span className="text-lg mt-10">Mô tả: {product.description}</span>}
+      </span>
+        {related && <div className='font-bold text-lg pt-10'>Có thể bạn cũng thích</div>}
+        <div className="overflow-x-auto whitespace-nowrap scrollbar-none bg-[#f0fffc] px-5 py-10 rounded-md">
+        {related && related.map((value:any)=> {
+          return (
+            <Card
+              className="inline-block rounded-lg mr-4 hover:bg-[#F0FFF0] transition-colors duration-300"
+              hoverable
+              style={{ width: 170 }}
+               // actions={[<Button onClick={()=>{}}><ShoppingCartOutlined /></Button>]}
+              cover={
+                <Image
+                minScale={1}
+                  preview={false}
+                  alt="example"
+                  src={value.images?.map((image: any) =>
+                      image.cover ? `http://localhost:9999/${image.uri}` : ""
+                    )
+                    .join("")}
+                />
+              }
+              onClick={() => router.push(`/product/${value.productId}`)}
+            >
+              <div className="size-4 w-full font-bold h-fit line-clamp-2 text-ellipsis">
+                {value.name}
+              </div>
+                
+              <small className='pt-1 line-clamp-1 text-ellipsis'>{value.description}</small>
+                
+            </Card>)
+        })}
       </div>
       <Nav />
     </main>
+      </ConfigProvider>
   );
 };
 
-export default Product;
+export default withQRCode(Product);

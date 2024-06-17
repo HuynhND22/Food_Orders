@@ -110,7 +110,7 @@ const Categories: React.FC = () => {
       }
     },
     {
-      title: 'Actions',
+      title: 'Thao tác',
       dataIndex: 'actions',
       key: 'actions',
       width: '1%',

@@ -8,6 +8,7 @@ import { InputNumber } from 'antd'; // Example import assuming InputNumber is fr
 import { table } from 'console';
 import axiosClient from '../configs/axiosClient';
 import { FieldType } from '../types/orders/index';
+import dayjs from 'dayjs';
 
 type Props = {};
 export default function Order({ }: Props) {
@@ -27,6 +28,7 @@ export default function Order({ }: Props) {
   const getOrders = async () => {
     try {
       const response = await axiosClient.get('/orders/all');
+      console.log(response.data);  
       setOrders(response.data);
     } catch (error) {
       console.log('Error:', error);
@@ -44,7 +46,8 @@ export default function Order({ }: Props) {
   //get table
   const getTables = async () => {
     try {
-      const response = await axiosClient.get('/table/all');
+      const response = await axiosClient.get('/tables/all');
+      // console.log(response.data);
       setTables(response.data);
     } catch (error) {
       console.log('Error:', error);
@@ -53,7 +56,7 @@ export default function Order({ }: Props) {
   //get status
   const getStatus = async () => {
     try {
-      const response = await axiosClient.get('/status/all');
+      const response = await axiosClient.get('/status/orders');
       setStatus(response.data);
     } catch (error) {
       console.log('Error:', error);
@@ -112,93 +115,90 @@ export default function Order({ }: Props) {
   //create table
   const columns = [
     {
-      title: 'Table',
+      title: 'Bàn',
       dataIndex: 'tableId',
       key: 'table',
       width: '10%',
+      render: (text:string, record:any) => {
+          return record.table.name
+      }
     },
     {
-      title: 'User',
-      dataIndex: 'user',
-      key: 'user',
-      width: '10%',
-    },
-    {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      width: '10%',
-    },
-    {
-      title: 'Payment',
+      title: 'Thanh toán',
       dataIndex: 'payment',
       key: 'payment',
       width: '10%',
     },
     {
-      title: 'orderDetails',
+      title: 'Nhân viên',
+      dataIndex: 'user',
+      key: 'user',
+      width: '10%',
+    },
+    {
+      title: 'Chi tiết',
       dataIndex: 'orderDetails',
       key: 'orderDetails',
       children: [
         {
-          title: 'ProductSizeId',
-          dataIndex: 'productSizeId',
+          title: 'Món',
           key: 'productSizeId',
+          render: (text:string, record:any) => {
+            return <div>
+              {record.orderDetails.map((item:any) => {
+                return <div>{item.promotion?.name ?? item.productSize?.product?.name + ` [${item.productSize?.size?.name}]`}</div>
+              })}
+            </div>
+          },
+          width: '10%'
         },
         {
-          title: 'Quantity',
-          dataIndex: 'quantity',
+          title: 'Số lượng',
           key: 'quantity',
-
+          render: (text:string, record:any) => {
+          return <div>
+              {record.orderDetails.map((item:any) => {
+                return <div>{item.quantity}</div>
+              })}
+            </div>
+          },
+          width: '6%'
         },
         {
-          title: 'Price',
+          title: 'Giá',
           dataIndex: 'price',
           key: 'price',
           width: '1%',
-          render: (text: string, record: any, index: number) => {
-            return <div style={{ textAlign: 'right' }}>{numeral(text).format('$0,0')}</div>;
-          },
-        },
-        {
-          title: 'Discount',
-          dataIndex: 'discount',
-          key: 'discount',
-          width: '1%',
-          render: (text: string, record: any, index: number) => {
-
-            return <div style={{ textAlign: 'right' }}>{numeral(text).format('0,0.0')}%</div>;
-          },
-        },
-        {
-          title: 'description',
-          dataIndex: 'description',
-          key: 'description',
+          render: (text:string, record:any) => {
+          return <div>
+            {record.orderDetails.map((item:any) => {
+              return <div>{numeral(item.price).format('0,0')}đ</div>
+            })}
+          </div>
+          }
         },
       ],
     },
-
     {
-      title: 'createAt',
-      dataIndex: 'createAt',
-      key: 'createAt',
-      width: '10%',
+      title: 'Trạng thái',
+      dataIndex: 'status',
+      key: 'status',
+      width: '20%',
+      render: (text:string, record:any) => {
+        return record.status.name
+      }
     },
     {
-      title: 'updatedAt',
-      dataIndex: 'updatedAt',
-      key: 'updatedAt',
-      width: '10%',
+      title: 'Ngày tạo - cập nhật gần nhất',
+      key: 'createdAt',
+      render: (text: any, record: any) => {
+        
+          return <span>{dayjs(record.createdAt).format( 'HH:mm DD/MM/YYYY')} - {dayjs(record.updatedAt).format( 'HH:mm DD/MM/YYYY')}</span>
+      },
+      width: '10$'
     },
     {
-      title: 'deletedAt',
-      dataIndex: 'deletedAt',
-      key: 'deletedAt',
-      width: '10%',
-    },
-
-    {
-      title: 'Actions',
+      title: 'Thao tác',
       dataIndex: 'actions',
       key: 'actions',
       width: '10%',
@@ -230,134 +230,6 @@ export default function Order({ }: Props) {
   ];
   return (
     <div style={{ padding: 36 }}>
-      <Card title='Create new order' style={{ width: '100%' }}>
-        <Form form={createForm} name='create-order' labelCol={{ span: 5 }} wrapperCol={{ span: 12 }} initialValues={{ tableId: '', description: '', createAt: '', statusId: '', userId: '', payment: '', updatedAt: '', productSizeId: '', deletedAt: '', discount: '', price: '', quantity: '', orderDetails: '' }} onFinish={onFinish}>
-          {/* tableId */}
-          <Form.Item<FieldType> name='tableId' label='Table' rules={[{ required: true }]} hasFeedback>
-            <Select
-              options={tables.map((item: any) => {
-                return {
-                  label: item.name,
-                  value: item.tableId,
-                };
-              })}
-            />
-          </Form.Item>
-          {/* userId */}
-          <Form.Item<FieldType> name='userId' label='User' rules={[{ required: true }]} hasFeedback>
-            <Select
-              options={users.map((item: any) => {
-                const fullName = `${item.firstName} ${item.lastName}`;
-                return {
-                  label: fullName,
-                  value: item.userId,
-                };
-              })}
-            />
-
-          </Form.Item>
-          {/* statusId */}
-          <Form.Item<FieldType> name='statusId' label='Status' rules={[{ required: true }]} hasFeedback>
-            <Select
-              options={status.map((item: any) => {
-                return {
-                  label: item.name,
-                  value: item.statusId,
-                };
-              })}
-            />
-          </Form.Item>
-          {/* payment */}
-          <Form.Item<FieldType> name='payment' label='payment' rules={[{ required: true }]} hasFeedback>
-            <Select
-              options={[
-                { label: 'Tiền mặt', value: 'Tiền mặt' },
-                { label: 'Ngân hàng', value: 'Ngân hàng' },
-              ]}
-            />
-          </Form.Item>
-          {/* promotion */}
-          <Form.List name='orderDetails'  >
-            {(fields, { add, remove }) => (
-              <>
-                {fields.map((field, index) => (
-                  <Space key={field.key} style={{ display: '', marginBottom: 10, }} align='baseline' >
-                    <Form.Item
-                      {...field}
-                      name={[field.name, 'productSizeId']}
-                      fieldKey={[field.fieldKey ?? index, 'productSizeId']} // Use index as fallback
-                      label='ProductSizeId' labelCol={{ span: 18 }} rules={[{ required: true }]}
-
-                    >
-                      <Input />
-                    </Form.Item>
-                    <Form.Item
-                      {...field}
-                      name={[field.name, 'quantity']}
-                      fieldKey={[field.fieldKey ?? index, 'quantity']} // Use index as fallback
-                      label='Quantity' labelCol={{ span: 10 }}
-                      rules={[{ required: true, type: 'number', min: 1 }]}
-                    >
-                      <InputNumber />
-                    </Form.Item>
-                    <Form.Item
-                      {...field}
-                      name={[field.name, 'price']}
-                      fieldKey={[field.fieldKey ?? index, 'price']} // Use index as fallback
-                      label='price' labelCol={{ span: 10 }}
-                      rules={[{ required: true }]}
-                    >
-                      <Input />
-                    </Form.Item>
-                    <Form.Item
-                      {...field}
-                      name={[field.name, 'discount']}
-                      fieldKey={[field.fieldKey ?? index, 'discount']} // Use index as fallback
-                      label='discount' labelCol={{ span: 10 }}
-                      rules={[{ required: true }]}
-                    >
-                      <Input />
-                    </Form.Item>
-                    <Form.Item
-                      {...field}
-                      name={[field.name, 'description']}
-                      fieldKey={[field.fieldKey ?? index, 'description']} // Use index as fallback
-                      label='description' labelCol={{ span: 10 }}
-
-                    >
-                      <Input />
-                    </Form.Item>
-                    <Button onClick={() => remove(field.name)}>Remove</Button>
-                  </Space>
-                ))}
-                <Form.Item label=' Order Details' labelCol={{ span: 5 }} rules={[{ required: true, message: 'Please input Quantity!' }]} >
-
-                  <Button type='dashed' onClick={() => add()} block> + Add Order Detail</Button>
-                </Form.Item>
-              </>
-            )}
-          </Form.List>
-
-          {/* createAt */}
-          <Form.Item<FieldType> label='CreatedAt' name='createdAt' rules={[{ required: true }]}>
-            <DatePicker />
-          </Form.Item>
-          {/* updateAt */}
-          <Form.Item<FieldType> label='Update Date' name='updatedAt'>
-            <DatePicker />
-          </Form.Item>
-          {/* deleteAt */}
-          <Form.Item<FieldType> label='Delete Date' name='deletedAt'>
-            <DatePicker />
-          </Form.Item>
-          {/* button summit */}
-          <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-            <Button type='primary' htmlType='submit'>
-              Save changes
-            </Button>
-          </Form.Item>
-        </Form>
-      </Card>
       {/* listOrder */}
       <Card title='List of products' style={{ width: '100%', marginTop: 36 }}>
         <Table dataSource={orders} columns={columns} />
@@ -479,21 +351,7 @@ export default function Order({ }: Props) {
                 </Form.Item>
               </>
             )}
-          </Form.List>
-
-          {/* createAt */}
-          <Form.Item<FieldType> label='CreatedAt' name='createdAt' rules={[{ required: true }]}>
-            <DatePicker />
-          </Form.Item>
-          {/* updateAt */}
-          <Form.Item<FieldType> label='Update Date' name='updatedAt'>
-            <DatePicker />
-          </Form.Item>
-          {/* deleteAt */}
-          <Form.Item<FieldType> label='Delete Date' name='deletedAt'>
-            <DatePicker />
-          </Form.Item>
-          
+          </Form.List>          
         </Form>
 
       </Modal>

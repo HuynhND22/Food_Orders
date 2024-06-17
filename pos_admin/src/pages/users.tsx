@@ -146,12 +146,8 @@ export default function Users({ }: Props) {
             dataIndex: 'createdAt',
             key: 'createdAt',
         },
-        
-   
-
- 
         {
-            title: 'Actions',
+            title: 'Thao tác',
             dataIndex: 'actions',
             key: 'actions',
             width: '10%',

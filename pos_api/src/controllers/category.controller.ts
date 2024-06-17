@@ -124,7 +124,7 @@ const hardDelete = async (req: Request, res: Response) => {
       return res.status(410).json({ error: 'Not found' });
     }
     await repository.delete({ categoryId: parseInt(req.params.id) });
-    res.status(200).send();
+    res.sendStatus(200);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });

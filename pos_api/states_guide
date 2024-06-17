@@ -3,6 +3,7 @@ users : 20 - 29
 table : 30 - 39
 product : 40 - 49
 promotion : 50 - 59
+supplier : 60 - 69
 
 
 ex
@@ -31,3 +32,7 @@ INSERT INTO states (statusId, name) VALUES (42, N'Khoá');
 INSERT INTO states (statusId, name) VALUES (50, N'Ngừng hoạt động');
 INSERT INTO states (statusId, name) VALUES (51, N'Đang hoạt động');
 INSERT INTO states (statusId, name) VALUES (52, N'Hết hạn');
+
+-- Insert trạng thái cho suppliers (60 - 69)
+INSERT INTO states (statusId, name) VALUES (60, N'Chưa kích hoạt');
+INSERT INTO states (statusId, name) VALUES (61, N'Đã kích hoạt');
