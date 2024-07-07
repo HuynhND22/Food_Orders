@@ -14,7 +14,11 @@ const Tables: React.FC = () => {
   const [deleted, setDeleted] = React.useState<'all' | 'deleted'>('all');
   const getTables = async () => {
     try {
-      const response = await axiosClient.get(`/tables/${deleted}`);
+      const response = await axiosClient.get(`/tables/${deleted}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       setTables(response.data);
     } catch (error) {
       console.log('Error:', error);
@@ -29,7 +33,11 @@ const Tables: React.FC = () => {
   const handleCreate = async (values: any) => {
     try {
       console.log('Success:', values);
-      await axiosClient.post('/tables/create', values);
+      await axiosClient.post('/tables/create', values, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       getTables();
       createForm.resetFields();
     } catch (error) {
@@ -40,7 +48,11 @@ const Tables: React.FC = () => {
   const handleUpdate = async (values: any) => {
     try {
       console.log('Success:', values);
-      await axiosClient.patch(`/tables/update/${selectedTables.tableId}`, values);
+      await axiosClient.patch(`/tables/update/${selectedTables.tableId}`, values, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       getTables();
       setSelectedTables(null);
       message.success('Cập nhật thành công!');
@@ -52,7 +64,11 @@ const Tables: React.FC = () => {
 
   const handleRemove = async (tableId: number) => {
     try {
-      await axiosClient.delete(`/tables/remove/${tableId}`);
+      await axiosClient.delete(`/tables/remove/${tableId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       getTables();
       message.success('Đã xóa!');
     } catch (error) {
@@ -62,7 +78,11 @@ const Tables: React.FC = () => {
 
   const handleDelete = async (tableId: number) => {
     try {
-      await axiosClient.delete(`/tables/delete/${tableId}`);
+      await axiosClient.delete(`/tables/delete/${tableId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       getTables();
       message.success('Đã xóa!')
     } catch (error) {
@@ -73,7 +93,11 @@ const Tables: React.FC = () => {
 
   const handleRestore  = async (tableId: number) => {
     try {
-      await axiosClient.post(`/tables/restore/${tableId}`)
+      await axiosClient.post(`/tables/restore/${tableId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      })
       getTables();
       message.success('Khôi phục thành công!')
     } catch (error) {
@@ -103,7 +127,11 @@ const Tables: React.FC = () => {
       title: 'Mã QR',
       key: 'qrCode',
       render: (text:string, record:any) =>{
-        return <Link to={process.env.REACT_APP_API_BASE_URL +'/tables/download?uri='+ record.qrCode}><Image preview={false} onClick={()=>{}} src={process.env.REACT_APP_API_BASE_URL + record.qrCode}/></Link>
+        return (<Link to={process.env.REACT_APP_API_BASE_URL +'/tables/download?uri='+ record.qrCode}>
+           <Tooltip title="Tải mã QR">
+            <Image preview={false} onClick={()=>{}} src={process.env.REACT_APP_API_BASE_URL + record.qrCode}/>
+            </Tooltip>
+          </Link>)
       }
     },
     {
@@ -173,7 +201,11 @@ const Tables: React.FC = () => {
   ];
   const checkNameUnique = async (cb: any, name: string, oldName?:string) => {
     try {
-      const res = await axiosClient.get(`/tables/check/unique?field=name&value=${name}&ignore=${oldName}`);
+      const res = await axiosClient.get(`/tables/check/unique?field=name&value=${name}&ignore=${oldName}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       console.log(res);
       cb(undefined)
     } catch (error) {

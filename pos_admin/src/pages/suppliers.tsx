@@ -42,7 +42,11 @@ export default function Suppliers(props: {}) {
 
   const getSuppliers = async () => {
     try {
-      const response = await axiosClient.get(`/suppliers/${deleted}`);
+      const response = await axiosClient.get(`/suppliers/${deleted}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       setSuppliers(response.data);
     } catch (error) {
       console.log("Error:", error);
@@ -56,8 +60,16 @@ export default function Suppliers(props: {}) {
   const getData = async () => {
     try {
       const [status, provinces] = await Promise.all([
-        axiosClient.get("/status/suppliers"),
-        axiosClient.get("/address/provinces"),
+        axiosClient.get("/status/suppliers", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      }),
+        axiosClient.get("/address/provinces", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      }),
       ]);
       setStatus(status.data);
       setProvinces(provinces.data);
@@ -70,7 +82,11 @@ export default function Suppliers(props: {}) {
   }, []);
 
   const getDistricts = async (provinceId: number) => {
-    const districts = await axiosClient.get(`/address/districts/${provinceId}`);
+    const districts = await axiosClient.get(`/address/districts/${provinceId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
     if (districts) {
       setDistricts(districts.data);
     } else {
@@ -78,7 +94,11 @@ export default function Suppliers(props: {}) {
     }
   };
   const getWards = async (districtId: number) => {
-    const wards = await axiosClient.get(`/address/wards/${districtId}`);
+    const wards = await axiosClient.get(`/address/wards/${districtId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
     if (wards) {
       setWards(wards.data);
     } else {
@@ -90,7 +110,11 @@ export default function Suppliers(props: {}) {
     try {
       console.log(values);
       console.log("Success:", values);
-      await axiosClient.post("/suppliers/create", values);
+      await axiosClient.post("/suppliers/create", values, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       getSuppliers();
       createForm.resetFields();
       message.success("Tạo mới thành công!");
@@ -102,7 +126,11 @@ export default function Suppliers(props: {}) {
 
   const onDelete = async (supplierId: number) => {
     try {
-      await axiosClient.delete(`/suppliers/${supplierId}`);
+      await axiosClient.delete(`/suppliers/${supplierId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       getSuppliers();
       message.success("Đã xóa!");
     } catch (error) {
@@ -115,7 +143,12 @@ export default function Suppliers(props: {}) {
       console.log("Success:", values);
       await axiosClient.patch(
         `/suppliers/update/${selectedSupplier.supplierId}`,
-        values
+        values,
+        {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      }
       );
       getSuppliers();
       setSelectedSupplier(null);
@@ -127,7 +160,11 @@ export default function Suppliers(props: {}) {
 
   const handleRemove = async (categoryId: number) => {
     try {
-      await axiosClient.delete(`/suppliers/remove/${categoryId}`);
+      await axiosClient.delete(`/suppliers/remove/${categoryId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       getSuppliers();
       message.success("Đã xóa!");
     } catch (error) {
@@ -137,7 +174,11 @@ export default function Suppliers(props: {}) {
 
   const handleDelete = async (categoryId: number) => {
     try {
-      await axiosClient.delete(`/suppliers/delete/${categoryId}`);
+      await axiosClient.delete(`/suppliers/delete/${categoryId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       getSuppliers();
       message.success("Đã xóa!");
     } catch (error) {
@@ -148,7 +189,11 @@ export default function Suppliers(props: {}) {
 
   const handleRestore = async (categoryId: number) => {
     try {
-      await axiosClient.post(`/suppliers/restore/${categoryId}`);
+      await axiosClient.post(`/suppliers/restore/${categoryId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       getSuppliers();
       message.success("Khôi phục thành công!");
     } catch (error) {
@@ -308,7 +353,12 @@ export default function Suppliers(props: {}) {
     async (cb: any, value: string, ignore?: string) => {
       try {
         await axiosClient.get(
-          `/suppliers/check/unique?field=name&value=${value}&ignore=${ignore}`
+          `/suppliers/check/unique?field=name&value=${value}&ignore=${ignore}`,
+          {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      }
         );
         cb(undefined);
       } catch (error) {
@@ -321,7 +371,12 @@ export default function Suppliers(props: {}) {
     async (cb: any, value: string, ignore?: string) => {
       try {
         await axiosClient.get(
-          `/suppliers/check/unique?field=email&value=${value}&ignore=${ignore}`
+          `/suppliers/check/unique?field=email&value=${value}&ignore=${ignore}`,
+          {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      }
         );
         cb(undefined);
       } catch (error) {
@@ -334,7 +389,12 @@ export default function Suppliers(props: {}) {
     async (cb: any, value: string, ignore?: string) => {
       try {
         await axiosClient.get(
-          `/suppliers/check/unique?field=phoneNumber&value=${value}&ignore=${ignore}`
+          `/suppliers/check/unique?field=phoneNumber&value=${value}&ignore=${ignore}`,
+          {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      }
         );
         cb(undefined);
       } catch (error) {
@@ -371,7 +431,7 @@ export default function Suppliers(props: {}) {
           >
             <Input />
           </Form.Item>
-          <Form.Item labelCol={{ span: 6 }} label="Address">
+          <Form.Item labelCol={{ span: 6 }} label="Địa chỉ">
             <Space style={{ display: "flex", flex: "wrap" }}>
               <Form.Item noStyle>
                 <Select

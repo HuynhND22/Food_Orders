@@ -1,10 +1,10 @@
-import { Button, Card, DatePicker, Form, Input, Modal, Popconfirm, Select, Space, Table, TableColumnsType, message, Upload } from 'antd';
+import { Button, Card, DatePicker, Form, Input, Modal, Popconfirm, Select, Space, Table, TableColumnsType, message, Upload, Cascader } from 'antd';
 import React from 'react';
 import { DeleteOutlined, EditOutlined, UploadOutlined } from '@ant-design/icons';
 import { CalendarOutlined, FolderAddOutlined, MailOutlined, PhoneOutlined, UserOutlined } from '@ant-design/icons';
 import numeral from 'numeral';
 import { Link } from 'react-router-dom';
-import { InputNumber } from 'antd'; // Example import assuming InputNumber is from Ant Design library
+import { InputNumber, Radio } from 'antd'; // Example import assuming InputNumber is from Ant Design library
 import { table } from 'console';
 import axiosClient from '../configs/axiosClient';
 import { FieldType } from '../types/orders/index';
@@ -27,7 +27,11 @@ export default function Order({ }: Props) {
   //get oder
   const getOrders = async () => {
     try {
-      const response = await axiosClient.get('/orders/all');
+      const response = await axiosClient.get('/orders/all', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       console.log(response.data);  
       setOrders(response.data);
     } catch (error) {
@@ -37,18 +41,12 @@ export default function Order({ }: Props) {
   //get orderDetails
   const getOrderDetails = async () => {
     try {
-      const response = await axiosClient.get('/orders/all');
+      const response = await axiosClient.get('/orders/all', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       setPromotions(response.data);
-    } catch (error) {
-      console.log('Error:', error);
-    }
-  };
-  //get table
-  const getTables = async () => {
-    try {
-      const response = await axiosClient.get('/tables/all');
-      // console.log(response.data);
-      setTables(response.data);
     } catch (error) {
       console.log('Error:', error);
     }
@@ -56,16 +54,11 @@ export default function Order({ }: Props) {
   //get status
   const getStatus = async () => {
     try {
-      const response = await axiosClient.get('/status/orders');
-      setStatus(response.data);
-    } catch (error) {
-      console.log('Error:', error);
-    }
-  };
-  //get users
-  const getUsers = async () => {
-    try {
-      const response = await axiosClient.get('/status/all');
+      const response = await axiosClient.get('/status/orders', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       setStatus(response.data);
     } catch (error) {
       console.log('Error:', error);
@@ -73,7 +66,6 @@ export default function Order({ }: Props) {
   };
 
   React.useEffect(() => {
-    getTables();
     getStatus();
     getOrders();
   }, []);
@@ -81,7 +73,11 @@ export default function Order({ }: Props) {
   const onFinish = async (values: FieldType) => {
     try {
       console.log('Success:', values);
-      await axiosClient.post('/orders/create', values);
+      await axiosClient.post('/orders/create', values, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       getOrders();
       createForm.resetFields();
       message.success('Create order successfully!');
@@ -92,7 +88,11 @@ export default function Order({ }: Props) {
   // delete order
   const onDelete = async (orderId: number) => {
     try {
-      await axiosClient.delete(`/orders/remove/${orderId}`);
+      await axiosClient.delete(`/orders/remove/${orderId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       getOrders();
       message.success('Order deleted successfully!');
     } catch (error) {
@@ -103,7 +103,11 @@ export default function Order({ }: Props) {
   const onUpdate = async (values: any) => {
     try {
       console.log('Success:', values);
-      await axiosClient.patch(`/orders/update/${selectedOrder.orderId}`, values);
+      await axiosClient.patch(`/orders/update/${selectedOrder.orderId}`, values, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       getOrders();
       setSelectedOrder(null);
       message.success('Order updated successfully!');
@@ -112,9 +116,29 @@ export default function Order({ }: Props) {
     }
   };
 
+  const updateStatus = async (orderId:number, statusId: number) => {
+    try {
+      await axiosClient.patch(`/orders/update/status/${orderId}`, {statusId: statusId}, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      })
+      message.success('Cập nhật thành công')
+      getOrders()
+    } catch (error) {
+      console.log(error);  
+      message.error('Lỗi, không thể cập nhật trạng thái')
+    }
+  }
+
   //create table
   const columns = [
     {
+      title: 'ID',
+      dataIndex: 'orderId',
+      key: 'orderId',
+      width: '1%',
+    },{
       title: 'Bàn',
       dataIndex: 'tableId',
       key: 'table',
@@ -183,9 +207,14 @@ export default function Order({ }: Props) {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
-      width: '20%',
+      width: '30%',
       render: (text:string, record:any) => {
-        return record.status.name
+          return (<Radio.Group defaultValue={record.status.statusId} disabled={record.status.statusId == 12 || record.status.statusId == 13} size="small" onChange={(value:any) => updateStatus(record.orderId, value.target.value)}>
+            {status.map((value:any) => {
+              return <Radio.Button value={value.statusId}>{value.name}</Radio.Button>
+            })}
+          </Radio.Group>)
+        // record.status.name
       }
     },
     {
@@ -197,45 +226,72 @@ export default function Order({ }: Props) {
       },
       width: '10$'
     },
-    {
-      title: 'Thao tác',
-      dataIndex: 'actions',
-      key: 'actions',
-      width: '10%',
-      render: (text: any, record: any) => {
-        return (
-          <Space size='small'>
-            <Button
-              type='primary'
-              icon={<EditOutlined />}
-              onClick={() => {
-                setSelectedOrder(record);
-                updateForm.setFieldsValue(record);
-              }}
-            />
-
-            <Popconfirm
-              title='Delete the order'
-              description='Are you sure to delete this order?'
-              onConfirm={() => {
-                onDelete(record.orderId);
-              }}
-            >
-              <Button type='primary' danger icon={<DeleteOutlined />} />
-            </Popconfirm>
-          </Space>
-        );
-      },
-    },
+    // {
+    //   title: 'Thao tác',
+    //   dataIndex: 'actions',
+    //   key: 'actions',
+    //   width: '10%',
+    //   render: (text: any, record: any) => {
+    //     return (
+    //       <Space size='small'>
+    //         <Button
+    //           type='primary'
+    //           icon={<EditOutlined />}
+    //           disabled={record.statusId == 12 || record.statusId == 13}
+    //           onClick={() => {
+    //             setSelectedOrder(record);
+    //             updateForm.setFieldsValue(record);
+    //           }}
+    //         />
+    //         <Popconfirm
+    //           title='Xoá đơn đặt món'
+    //           description='Bạn có chắc muốn xoá?'
+    //           onConfirm={() => {
+    //             onDelete(record.orderId);
+    //           }}
+    //         >
+    //           <Button type='primary' danger icon={<DeleteOutlined />} />
+    //         </Popconfirm>
+    //       </Space>
+    //     );
+    //   },
+    // },
   ];
+
+const options = [
+  {
+    value: 'zhejiang',
+    label: 'Zhejiang',
+    children: [
+      {
+        value: 'hangzhou',
+        label: 'Hangzhou',
+      },
+    ],
+  },
+  {
+    value: 'jiangsu',
+    label: 'Jiangsu',
+    children: [
+      {
+        value: 'nanjing',
+        label: 'Nanjing',
+      },
+    ],
+  },
+];
+
+
+
   return (
     <div style={{ padding: 36 }}>
       {/* listOrder */}
-      <Card title='List of products' style={{ width: '100%', marginTop: 36 }}>
+      <Card title='Danh sách đơn đặt món' style={{ width: '100%', marginTop: 36 }}>
         <Table dataSource={orders} columns={columns} />
       </Card>
 
       <Modal
+        width={1200}
         centered
         title='Edit product'
         open={selectedOrder}
@@ -304,7 +360,7 @@ export default function Order({ }: Props) {
                       label='ProductSizeId' labelCol={{ span: 18 }} 
                       rules={[{ required: true }]}
                     >
-                      <Input />
+                      <Cascader options={options}/>
                     </Form.Item>
                     <Form.Item
                       {...field}

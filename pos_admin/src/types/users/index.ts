@@ -5,6 +5,7 @@ export type FieldType = {
     gender: number;
     email: string;
     phoneNumber:string;
+    password:string;
     address: string;
     statusId: number;
     wardId: number;

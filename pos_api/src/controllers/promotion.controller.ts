@@ -10,7 +10,24 @@ const promotionRepository = AppDataSource.getRepository(Promotion);
 
 const getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const promotions = await promotionRepository.find({ relations: ['promotionDetails.productSize.product', 'promotionDetails.productSize.size'] });
+        const promotions = await promotionRepository.find({ relations: ['promotionDetails.productSize.product.images', 'promotionDetails.productSize.size'], order: {createdAt: 'DESC'} });
+    //     const promotions = await promotionRepository.createQueryBuilder('promotion')
+    // .leftJoinAndSelect('promotion.promotionDetails', 'promotionDetail')
+    // .leftJoinAndSelect('promotionDetail.productSize', 'productSize')
+    // .leftJoinAndSelect('productSize.product', 'product', 'product.deletedAt IS NULL')
+    // .leftJoinAndSelect('productSize.size', 'size')
+    // .getMany();
+    // promotions.forEach(promotion => {
+    // promotion.promotionDetails = promotion.promotionDetails.filter(detail => detail.productSize.product !== null);
+    // });
+    promotions.forEach(promotion => {
+        promotion.promotionDetails = promotion.promotionDetails.filter(detail => detail.productSize.product !== null);
+        promotion.promotionDetails.forEach(detail => {
+            if (detail.productSize.product) {
+                detail.productSize.product.images = detail.productSize.product.images.filter(image => image.cover === true);
+            }
+        });
+    });
         if (promotions.length === 0) {
             return res.status(204).send({
                 error: "No content",
@@ -44,11 +61,17 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         await queryRunner.startTransaction();
         try {
             const promotion = req.body;
+            console.log(promotion)
+            try {
+
                 const result = await queryRunner.manager.save(Promotion, promotion);
-                const promotionDetails = promotion.promotionDetails.map((pd:any) => {
+                const promotionDetails = promotion.promotionDetail.map((pd:any) => {
                     return { ...pd, promotionId: result.promotionId };
                 });
                 await queryRunner.manager.save(PromotionDetail, promotionDetails);
+            } catch (e) {
+                console.log('avs ', e);    
+            }
             await queryRunner.commitTransaction();
 
             res.sendStatus(200)
@@ -192,7 +215,15 @@ const checkPromotionUnique = async (req: Request, res: Response, next: NextFunct
 
 const client = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const promotions = await promotionRepository.find({where: {statusId: 51}, relations: ['promotionDetails.productSize.product', 'promotionDetails.productSize.size'] });
+        const promotions = await promotionRepository.find({where: {statusId: 51}, relations: ['promotionDetails.productSize.product.images', 'promotionDetails.productSize.size'],order: {createdAt: 'DESC'} });
+        promotions.forEach(promotion => {
+            promotion.promotionDetails = promotion.promotionDetails.filter(detail => detail.productSize.product !== null);
+            promotion.promotionDetails.forEach(detail => {
+                if (detail.productSize.product) {
+                    detail.productSize.product.images = detail.productSize.product.images.filter(image => image.cover === true);
+                }
+            });
+        });
         if (promotions.length === 0) {
             return res.status(204).send({
                 error: "No content",

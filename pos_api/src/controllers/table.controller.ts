@@ -15,7 +15,7 @@ require('dotenv').config()
 
 const getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const tables = await repository.find();
+        const tables = await repository.find({order: {createdAt: 'DESC'}});
         if (tables.length === 0) {
             return res.status(204).json({
                 error: 'No content',

@@ -30,7 +30,7 @@ export class Cart extends BaseEntity {
   @JoinColumn({name: 'productSizeId'})
   productSizes: ProductSize[];
 
-  @ManyToOne(() => Promotion, (pr) => pr.carts)
+  @ManyToOne(() => Promotion, (pr) => pr.carts, { onDelete: 'CASCADE' })
   @JoinColumn({name: 'promotionId'})
   promotion: Promotion;
 

@@ -5,9 +5,9 @@ import { Image } from "../entities/image.entity";
 import { handleUniqueError } from "../helpers/handleUniqueError";
 import { ProductSize } from "../entities/productSize.entity";
 import fs from "fs";
-import { IsNull, Not } from "typeorm";
+import { IsNull, Not, Like } from "typeorm";
 import checkUnique from "../helpers/checkUnique";
-// import { upload } from "../helpers/uploadFile";
+
 const multer = require('multer');
 const path = require('path');
 
@@ -15,13 +15,24 @@ const repository = AppDataSource.getRepository(Product);
 
 const getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const products = await repository.find({relations: ['images', 'category', 'supplier', 'status', 'productSizes.size']});
+        const products = await repository.find({relations: ['images', 'category', 'supplier', 'status'], order: {createdAt: 'DESC'}});
+        // const products = await repository
+        //   .createQueryBuilder('product')
+        //   .leftJoinAndSelect('product.images', 'images')
+        //   .leftJoinAndSelect('product.category', 'category')
+        //   .leftJoinAndSelect('product.supplier', 'supplier')
+        //   .leftJoinAndSelect('product.status', 'status')
+        //   .leftJoinAndSelect('product.productSizes', 'productSizes')
+        //   .leftJoinAndSelect('productSizes.size', 'size')
+        //   .orderBy('product.createdAt', 'DESC')
+        //   .getMany();
         if (products.length === 0) {
             return res.status(204).send({
                 error: "No content",
             });
         }
-        res.json(products);
+        // console.log(products);    
+        res.status(200).json(products);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal server error" });
@@ -63,10 +74,6 @@ const create = async (req: any, res: Response, next: NextFunction) => {
 
             const upload = multer({ storage: storage }).array("images", 5);
 
-            // const images = product.images?.map((img:any) => {
-            //     return {...img, productId: result.productId, uri: '/uploads/products/'};
-            // })
-            
             await upload(req, res, async function (err:any) {
                 if (err) {
                     console.log(err);
@@ -96,12 +103,12 @@ const create = async (req: any, res: Response, next: NextFunction) => {
                         const images = req.files?.map((file:any) => {
                             return {uri: 'uploads/products/'+file?.filename, productId: result.productId, cover: file?.filename.includes(product.cover)}
                         });
-                        console.log(images);	
+                        console.log(images);
                         await queryRunner.manager.save(Image, images);
 
                         const sizes = await JSON.parse(product.productSize).map((size:any) => {
                             console.log(size);	
-                            return {sizeId: size.sizeId, productId: result.productId, price: size.price, discount: size.discount};
+                            return {sizeId: size.sizeId, productId: result.productId, price: size.price, discount: size.discount, stock: size.stock};
                         })
                         console.log(sizes);	
                         await queryRunner.manager.save(ProductSize, sizes);
@@ -134,140 +141,284 @@ const create = async (req: any, res: Response, next: NextFunction) => {
 }
 
 const update = async (req:any, res:Response, next: NextFunction) => {
-    try {
-        const queryRunner = repository.manager.connection.createQueryRunner();
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
-        try {
-            const productId = parseInt(req.params.id);
-            const product:any = await queryRunner.manager.findOne(Product, {where: {productId: productId}});
-            if (!product) return res.sendStatus(410);
+    const storage = multer.diskStorage({
+        contentType: multer.AUTO_CONTENT_TYPE,
+        destination: function (req:Request, file:any, cb:Function) {
+            if (!fs.existsSync(`./public/uploads/products/`)) {
+                fs.mkdirSync(`./public/uploads/products/`, { recursive: true });
+              }
+            return cb(null, `./public/uploads/products/`);
+        },
+        filename: function (req:any, file:any, cb:any) {
+          cb(null, Date.now() + '-' + file.originalname)
+          return Date.now() + '-' + file.originalname
+        }
+    });
 
+    const upload = multer({ storage: storage }).array("images", 5);
+
+    await upload(req, res, async function (err:any) {
+        if (err) {
+            console.log(err);
+            throw err;
+        } else {
+            const queryRunner = repository.manager.connection.createQueryRunner();
+            await queryRunner.connect();
+            await queryRunner.startTransaction();
             try {
-                const storage = multer.diskStorage({
-                    contentType: multer.AUTO_CONTENT_TYPE,
-                    destination: function (req:Request, file:any, cb:Function) {
-                        if (!fs.existsSync(`./public/uploads/products/`)) {
-                            fs.mkdirSync(`./public/uploads/products/`, { recursive: true });
-                          }
-                      return cb(null, `./public/uploads/products/`);
-                    },
-                    filename: function (req:any, file:any, cb:any) {
-                      cb(null, Date.now() + '-' + file.originalname)
-                      return Date.now() + '-' + file.originalname
+                const productId = parseInt(req.params.id);
+                const found:any = await queryRunner.manager.findOne(Product, {where: {productId: productId}});
+                if (!found) return res.sendStatus(410);
+
+                const product = req.body;
+                const removeSurroundingQuotes = (value:any) => {
+                    if (typeof value === 'string' && value.startsWith('"') && value.endsWith('"')) {
+                        return value.slice(1, -1);
                     }
+                    return value;
+                };
+                Object.keys(product).forEach(key => {
+                    product[key] = removeSurroundingQuotes(product[key]);
                 });
-    
-                const upload = multer({ storage: storage }).array("images", 5);
-                
-                await upload(req, res, async function (err:any) {
+                let productSizes = JSON.parse(product.productSizes)
+                let currentSizes:any = await queryRunner.manager.find(ProductSize, {where: {productId: productId}})
 
-                })
-            } catch (error:any) {
-                console.log(error);	
-            }
+                const sizes:any = await Promise.all(productSizes.map( async(value:any) => {
+                    if (!value.productSizeId) {
+                        console.log(value);
+                        try {
+                            await queryRunner.manager.save(ProductSize, {sizeId: value.sizeId, productId: productId, price: value.price, discount: value.discount});
+                        } catch (err) {
+                            console.log(err);    
+                        }
+                    } else {                        
+                        try {
+                            await queryRunner.manager.softDelete(ProductSize, value.productSizeId);
+                        } catch (err) {
+                            console.log(err);    
+                        }
+                    }
+                }))
+                const productCopy = { ...product };
+                delete productCopy.productSizes;
+                delete productCopy.images;
 
-            const data = req.body;
+                console.log(productCopy);    
+                try {
+                    Object.assign(found, productCopy)
+                    console.log(found);
+                    await queryRunner.manager.save(found);
+                } catch (err) {
+                    console.log(err);
+                }
 
-            Object.entries(data).forEach(([key, value]:any) => {
-                product[key] = value;
-            });
 
-            await queryRunner.manager.save(Product, product);
-            
-            const image = await queryRunner.manager.find(Image, {where: {productId: productId}});
-            
-            // console.log(image);	
-            if(data.images){
 
                 const images = req.files?.map((file:any) => {
                     return {uri: 'uploads/products/'+file?.filename, productId: productId, cover: file?.filename.includes(product.cover)}
                 });
-                console.log(images);	
-                await queryRunner.manager.save(Image, images);
 
-                await Promise.all( image.map( async(value:any) => {
-                    const matchingItem = data.images.find((img:any) => img.uri == value.uri)
-                    if (!matchingItem) {
-                        queryRunner.manager.delete(Image, { imageId: value.imageId})
-                        fs.unlink(`public/${value.uri}`, (err:any) => {
-                            if (err) throw err
-                        })
-                    }
-                }));
-            }
+                if(images.length != 0) await queryRunner.manager.save(Image, images);
 
-            const storage = multer.diskStorage({
-                destination: function (req:Request, file:any, cb:Function) {
-                return cb(null, path.join(__dirname, '../../public/uploads/products/'));
-                },
-                filename: async function (req:Request, file:any, cb:Function) {
-                    const images = product.images?.map((img:any) => {
-                        return {...img, productId: productId, uri: '/uploads/products/'};
-                    })
-                    console.log('fileNmae ' + path.extname(file.originalname));	
-                    await queryRunner.manager.save(Image, images);
-                    return cb(null, Date.now() + path.extname(file.originalname));
-                },
-            });
 
-            const upload = multer({ storage: storage }).array("images", 5);
-            await upload(req, res, function (err:any) {
-                if (err) {
-                    console.log(err);
-                } else {
-                    console.log('upload ok');
+            // if (data.sizes) {
+
+            //     const sizes = await JSON.parse(product.productSizes).map((size:any) => {
+            //         console.log(size);    
+            //         return {sizeId: size.sizeId, productId: productId, price: size.price, discount: size.discount};
+            //     })
+
+
+            //     const currentSizes = await queryRunner.manager.find(ProductSize, { where: { productId: productId } });
+
+            //     await Promise.all(currentSizes.map(async (size: any) => {
+            //         const matchingItem = data.sizes.find((item: any) => item.productSizeId === size.productSizeId);
+            //         if (matchingItem) {
+            //             await queryRunner.manager.save(ProductSize, matchingItem);
+            //         } else {
+            //             await queryRunner.manager.softDelete(ProductSize, size.productSizeId);
+            //         }
+            //     }));
+
+            //     await Promise.all(data.sizes.map(async (item: any) => {
+            //         if (!currentSizes.some((size: any) => size.productSizeId === item.productSizeId)) {
+            //             let newSize = {...item, productId: productId};
+            //             await queryRunner.manager.save(ProductSize, newSize);
+            //         }
+            //     }));
+            // }
+
+
+
+
+                return res.sendStatus(200)
+
+                await queryRunner.commitTransaction();
+            } catch (error:any) {
+                await queryRunner.rollbackTransaction();
+                if(error.number == 2627) {
+                    const message = handleUniqueError(error);
+                    return res.status(400).json({ error: message });
                 }
-            });
-
-
-            if (data.sizes) {
-
-                const sizes = await JSON.parse(product.productSizes).map((size:any) => {
-                    console.log(size);	
-                    return {sizeId: size.sizeId, productId: productId, price: size.price, discount: size.discount};
-                })
-
-
-                const currentSizes = await queryRunner.manager.find(ProductSize, { where: { productId: productId } });
-
-                await Promise.all(currentSizes.map(async (size: any) => {
-                    const matchingItem = data.sizes.find((item: any) => item.productSizeId === size.productSizeId);
-                    if (matchingItem) {
-                        await queryRunner.manager.save(ProductSize, matchingItem);
-                    } else {
-                        await queryRunner.manager.softDelete(ProductSize, size.productSizeId);
-                    }
-                }));
-
-                await Promise.all(data.sizes.map(async (item: any) => {
-                    if (!currentSizes.some((size: any) => size.productSizeId === item.productSizeId)) {
-                        let newSize = {...item, productId: productId};
-                        await queryRunner.manager.save(ProductSize, newSize);
-                    }
-                }));
+                console.log(error);
+                return res.status(500).json({ error: "Transaction failed" });
+            } finally {
+                await queryRunner.release();
             }
-
-            await queryRunner.commitTransaction();
-
-            const success = await repository.findOne({where: {productId: productId}, relations: ['category', 'supplier', 'status', 'productSizes.size', 'images']})
-            return res.status(200).json(success);
-
-        } catch (error:any) {
-            await queryRunner.rollbackTransaction();
-            if(error.number == 2627) {
-                const message = handleUniqueError(error);
-                return res.status(400).json({ error: message });
-            }
-            console.log(error);
-            return res.status(500).json({ error: "Transaction failed" });
-        } finally {
-            await queryRunner.release();
         }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Internal server error" });
-    }
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // try {
+    //     const queryRunner = repository.manager.connection.createQueryRunner();
+    //     await queryRunner.connect();
+    //     await queryRunner.startTransaction();
+    //     try {
+    //         const productId = parseInt(req.params.id);
+    //         const product:any = await queryRunner.manager.findOne(Product, {where: {productId: productId}});
+    //         if (!product) return res.sendStatus(410);
+
+    //         try {
+    //             const storage = multer.diskStorage({
+    //                 contentType: multer.AUTO_CONTENT_TYPE,
+    //                 destination: function (req:Request, file:any, cb:Function) {
+    //                     if (!fs.existsSync(`./public/uploads/products/`)) {
+    //                         fs.mkdirSync(`./public/uploads/products/`, { recursive: true });
+    //                       }
+    //                   return cb(null, `./public/uploads/products/`);
+    //                 },
+    //                 filename: function (req:any, file:any, cb:any) {
+    //                   cb(null, Date.now() + '-' + file.originalname)
+    //                   return Date.now() + '-' + file.originalname
+    //                 }
+    //             });
+    
+    //             const upload = multer({ storage: storage }).array("images", 5);
+                
+    //             await upload(req, res, async function (err:any) {
+
+    //             })
+    //         } catch (error:any) {
+    //             console.log(error);	
+    //         }
+
+    //         const data = req.body;
+
+    //         Object.entries(data).forEach(([key, value]:any) => {
+    //             product[key] = value;
+    //         });
+
+    //         await queryRunner.manager.save(Product, product);
+            
+    //         const image = await queryRunner.manager.find(Image, {where: {productId: productId}});
+            
+    //         // console.log(image);	
+    //         if(data.images){
+
+    //             const images = req.files?.map((file:any) => {
+    //                 return {uri: 'uploads/products/'+file?.filename, productId: productId, cover: file?.filename.includes(product.cover)}
+    //             });
+    //             console.log(images);	
+    //             await queryRunner.manager.save(Image, images);
+
+    //             await Promise.all( image.map( async(value:any) => {
+    //                 const matchingItem = data.images.find((img:any) => img.uri == value.uri)
+    //                 if (!matchingItem) {
+    //                     queryRunner.manager.delete(Image, { imageId: value.imageId})
+    //                     fs.unlink(`public/${value.uri}`, (err:any) => {
+    //                         if (err) throw err
+    //                     })
+    //                 }
+    //             }));
+    //         }
+
+    //         const storage = multer.diskStorage({
+    //             destination: function (req:Request, file:any, cb:Function) {
+    //             return cb(null, path.join(__dirname, '../../public/uploads/products/'));
+    //             },
+    //             filename: async function (req:Request, file:any, cb:Function) {
+    //                 const images = product.images?.map((img:any) => {
+    //                     return {...img, productId: productId, uri: '/uploads/products/'};
+    //                 })
+    //                 console.log('fileNmae ' + path.extname(file.originalname));	
+    //                 await queryRunner.manager.save(Image, images);
+    //                 return cb(null, Date.now() + path.extname(file.originalname));
+    //             },
+    //         });
+
+    //         const upload = multer({ storage: storage }).array("images", 5);
+    //         await upload(req, res, function (err:any) {
+    //             if (err) {
+    //                 console.log(err);
+    //             } else {
+    //                 console.log('upload ok');
+    //             }
+    //         });
+
+
+    //         if (data.sizes) {
+
+    //             const sizes = await JSON.parse(product.productSizes).map((size:any) => {
+    //                 console.log(size);	
+    //                 return {sizeId: size.sizeId, productId: productId, price: size.price, discount: size.discount};
+    //             })
+
+
+    //             const currentSizes = await queryRunner.manager.find(ProductSize, { where: { productId: productId } });
+
+    //             await Promise.all(currentSizes.map(async (size: any) => {
+    //                 const matchingItem = data.sizes.find((item: any) => item.productSizeId === size.productSizeId);
+    //                 if (matchingItem) {
+    //                     await queryRunner.manager.save(ProductSize, matchingItem);
+    //                 } else {
+    //                     await queryRunner.manager.softDelete(ProductSize, size.productSizeId);
+    //                 }
+    //             }));
+
+    //             await Promise.all(data.sizes.map(async (item: any) => {
+    //                 if (!currentSizes.some((size: any) => size.productSizeId === item.productSizeId)) {
+    //                     let newSize = {...item, productId: productId};
+    //                     await queryRunner.manager.save(ProductSize, newSize);
+    //                 }
+    //             }));
+    //         }
+
+    //         await queryRunner.commitTransaction();
+
+    //         const success = await repository.findOne({where: {productId: productId}, relations: ['category', 'supplier', 'status', 'productSizes.size', 'images']})
+    //         return res.status(200).json(success);
+
+    //     } catch (error:any) {
+    //         await queryRunner.rollbackTransaction();
+    //         if(error.number == 2627) {
+    //             const message = handleUniqueError(error);
+    //             return res.status(400).json({ error: message });
+    //         }
+    //         console.log(error);
+    //         return res.status(500).json({ error: "Transaction failed" });
+    //     } finally {
+    //         await queryRunner.release();
+    //     }
+    // } catch (error) {
+    //     console.error(error);
+    //     res.status(500).json({ error: "Internal server error" });
+    // }
 }
 
 const softDelete = async (req: Request, res:Response, next:NextFunction) => {
@@ -299,7 +450,7 @@ const restore = async (req: Request, res:Response, next:NextFunction) => {
 
 const getDeleted = async (req: Request, res:Response, next:NextFunction) => {
     try {
-        const products = await repository.find({withDeleted: true, where: {deletedAt: Not(IsNull())}, relations: ['images', 'category', 'supplier', 'status', 'productSizes.size']});
+        const products = await repository.find({withDeleted: true, where: {deletedAt: Not(IsNull())}, relations: ['images', 'category', 'supplier', 'status'], order: {deletedAt: 'DESC'}});
         if (products.length === 0) {
             return res.status(204).send({
                 error: "No content",
@@ -342,8 +493,11 @@ const checkProductUnique = async (req: Request, res:Response, next:NextFunction)
 
 const getByCategory = async (req:Request, res:Response) => {
     try {
+        const search = req.query.search
+        const searchCondition = search ? { name: Like(`%${search}%`) } : {};
+
         const {categoryId} = req.params;
-        const products = await repository.find({where: {statusId: 41, categoryId: parseInt(categoryId)}, relations: ['images', 'category', 'supplier', 'status', 'productSizes.size']});
+        const products = await repository.find({where: {statusId: 41, categoryId: parseInt(categoryId), ...searchCondition}, relations: ['images', 'category', 'supplier', 'status', 'productSizes.size'], order: {createdAt: 'DESC'}});
         if (products.length === 0) {
             return res.status(204).send({
                 error: "No content",
@@ -358,7 +512,10 @@ const getByCategory = async (req:Request, res:Response) => {
 
 const client = async (req:Request, res:Response) => {
     try {
-        const products = await repository.find({where: {statusId: 41}, relations: ['images', 'category', 'supplier', 'status', 'productSizes.size']});
+        const search = req.query.search
+        const searchCondition = search ? { name: Like(`%${search}%`) } : {};
+
+        const products = await repository.find({where: {statusId: 41, ...searchCondition}, relations: ['images', 'category', 'supplier', 'status', 'productSizes.size'], order: {createdAt: 'DESC'}});
         if (products.length === 0) {
             return res.status(204).send({
                 error: "No content",

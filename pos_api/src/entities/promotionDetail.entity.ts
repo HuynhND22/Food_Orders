@@ -22,13 +22,13 @@ export class PromotionDetail extends BaseEntity {
   @Column({type: 'nvarchar', length: 255, nullable: true})
   description: string;
 
-  @ManyToOne(() => ProductSize, (ps) => ps.promotionDetails)
+  @ManyToOne(() => ProductSize, (ps) => ps.promotionDetails, { onDelete: 'CASCADE' })
   @JoinColumn({
     name: 'productSizeId',
   })
   productSize: ProductSize;
 
-  @ManyToOne(() => Promotion, (pm) => pm.promotionDetails)
+  @ManyToOne(() => Promotion, (pm) => pm.promotionDetails, { onDelete: 'CASCADE' })
   @JoinColumn({
     name: 'promotionId'
   })

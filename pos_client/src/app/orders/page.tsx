@@ -82,7 +82,7 @@ const Order = () => {
   return (
     <Master>
       <aside>
-        <div className="bg-slate-400 w-full h-20 flex">
+        <div className="bg-[#ffffff] w-full rounded-md h-20 flex">
           <Space wrap size={16}>
             <Avatar size={64} icon={<BiUser />} />
           </Space>

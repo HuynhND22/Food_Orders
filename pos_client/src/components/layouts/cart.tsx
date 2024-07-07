@@ -41,7 +41,7 @@ export default function Cart() {
       render: (text: any, record: any, index: any) => {
         return (
           <div>
-            <span>{record.price.toLocaleString("vi-VN") + "đ"}</span>
+            <span>{record.price.toLocaleString("vi-VN", 0) + "đ"}</span>
             <span className="w-0">
             <Button size="small" type="text" onClick={()=>{
               axiosClient.patch(`/carts/update/${record.cartId}`, {quantity: 0})
@@ -66,7 +66,7 @@ export default function Cart() {
           ? item.productSizes.product.name + ' ' + item.productSizes.size.name
           : item.promotion.name;
         const price = item.promotion
-          ? item.promotion.price
+          ? item.promotion.price * item.quantity
           : item.productSizes.price *
             (1 - item.productSizes.discount / 100) *
             item.quantity;
@@ -136,7 +136,7 @@ const ProductItem = ({ product }: any) => {
           <TiMinus size={10} />
         </Button>
         <InputNumber
-          onChange={(value:number) => {
+          onChange={(value:number | null) => {
             setQuantity(value)
             setTimeout(() => {
               setRefresh(!refresh)

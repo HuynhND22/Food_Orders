@@ -20,7 +20,9 @@ const Table = ({ params: { code } }: any) => {
     .get(`tables/name/${a}`)
     .then((response: any) => {
       Cookies.set("table", JSON.stringify(response.data));
-      router.push("/");
+      setTimeout(() => {
+        router.push("/");
+      }, 2000);
     })
     .catch((error: any) => {
       Cookies.remove("table");

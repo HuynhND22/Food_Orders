@@ -10,7 +10,7 @@ import {debounce} from "ahooks/es/utils/lodash-polyfill";
 import dayjs from 'dayjs'
 type Props = {};
 export default function Products({ }: Props) {
-  const [products, setProducts] = React.useState([]);
+  const [products, setProducts] = React.useState<any>([]);
   const [categories, setCategories] = React.useState([]);
   const [suppliers, setSuppliers] = React.useState([]);
   const [sizes, setSizes] = React.useState([]);
@@ -21,17 +21,19 @@ export default function Products({ }: Props) {
   const [file, setFile] = React.useState([]);
   const [deleted, setDeleted] = React.useState('all');
 
-const [previewOpen, setPreviewOpen] = React.useState(false);
+  const [previewOpen, setPreviewOpen] = React.useState(false);
   const [previewImage, setPreviewImage] = React.useState('');
   const [fileList, setFileList] = React.useState<UploadFile[]>([]);
-type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
+  const [cover, setCover] = React.useState<any>();
+  const [fileListUpdate, setFileListUpdate] = React.useState<UploadFile[]>([]);
+  type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
   const getBase64 = (file: FileType): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = (error) => reject(error);
-  });
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
 
 
   const checkExist = (file:any) =>  {
@@ -56,13 +58,26 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
     setPreviewOpen(true);
   };
 
-  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) =>
+  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
     setFileList(newFileList);
-    let fileName:any = [];
-    fileList.map((value:any) => {
-      fileName.push(value.name)
-    })
-    const a = fileName.filter((value:any, index:any)=> fileName.indexOf(value)===index)
+    console.log(newFileList);
+    // let fileName:any = [];
+    // fileList.map((value:any) => {
+    //   fileName.push(value.name)
+    // })
+    // const a = fileName.filter((value:any, index:any)=> fileName.indexOf(value)===index)
+    // console.log(a);
+  }
+  const handleChangeUpdate: UploadProps['onChange'] = ({ fileList: newFileList }) => {
+    setFileListUpdate(newFileList);
+    console.log('newFileList',newFileList);
+    // let fileName:any = [];
+    // fileList.map((value:any) => {
+    //   fileName.push(value.name)
+    // })
+    // const a = fileName.filter((value:any, index:any)=> fileName.indexOf(value)===index)
+    // console.log(a);
+  }
     const uploadButton = (
       <button style={{ border: 0, background: 'none' }} type="button">
         <PlusOutlined />
@@ -70,10 +85,13 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
       </button>
     );
 
+    const fileListMerge = fileListUpdate.concat(fileList)
+
     const coverList =  (
       <Form.Item label='cover' name="cover" rules={[{required:true, message: 'Ảnh cover là bắt buộc'}]}>
         <Radio.Group buttonStyle="solid">
-          {fileList.map((value)=>{
+          {
+            fileListMerge.map((value)=>{
             return <Radio.Button style={{width:110}} value={value.name}><span style={
               {
                 display: 'block',
@@ -89,9 +107,24 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
   const getProducts = async () => {
     try {
-      const response = await axiosClient.get(`/products/${deleted}`);
-      // console.log(response.data);  
-      setProducts(response.data);
+      const response = await axiosClient.get(`/products/${deleted}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+      let product = new Array();
+      await Promise.all(response.data.map(async(value:any)=> {
+        // console.log(value);
+        const res = await axiosClient.get(`/sizes/product/${value.productId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      })
+        await product.push({...value, productSizes: res.data})
+        // console.log(product);
+      }))
+        setProducts(product);
+      console.log(product);
     } catch (error) {
       console.log('Error:', error);
     }
@@ -99,7 +132,11 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
   const getCategories = async () => {
     try {
-      const response = await axiosClient.get('/categories/all');
+      const response = await axiosClient.get('/categories/all', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       setCategories(response.data);
     } catch (error) {
       console.log('Error:', error);
@@ -107,7 +144,11 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
   };
   const getSizes = async () => {
     try {
-      const response = await axiosClient.get('/sizes/all');
+      const response = await axiosClient.get('/sizes/all', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       setSizes(response.data);
     } catch (error) {
       console.log('Error:', error);
@@ -115,7 +156,11 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
   };
   const getStatus = async () => {
     try {
-      const response = await axiosClient.get('/status/products');
+      const response = await axiosClient.get('/status/products', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       setStatus(response.data);
     } catch (error) {
       console.log('Error:', error);
@@ -124,7 +169,11 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
   const getSuppliers = async () => {
     try {
-      const response = await axiosClient.get('/suppliers/all');
+      const response = await axiosClient.get('/suppliers/all', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       setSuppliers(response.data);
     } catch (error) {
       console.log('Error:', error);
@@ -132,12 +181,15 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
   };
 
   React.useEffect(() => {
+    getProducts();
+  }, [deleted]);
+React.useEffect(() => {
     getSizes()
     getStatus()
-    getProducts();
     getCategories();
     getSuppliers();
-  }, [deleted]);
+}, [])  
+
 
   const onFinish = async (values: any) => {
     const formData:any = new FormData();
@@ -157,6 +209,7 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
       const response = await axiosClient.post('/products/create', formData,{
          headers: {
           'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
       });
       getProducts();
@@ -169,10 +222,17 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
   };
 
   const onUpdate = async (values: any) => {
+    const a = {...values, oldImages: fileListUpdate, images: fileList}
+    console.log(a);
     const formData:any = new FormData();
     if (fileList) {
       fileList.map((value)=>{
         formData.append('images', value.originFileObj);
+      })
+    }
+    if (fileListUpdate) {
+      fileListUpdate.map((value)=>{
+        formData.append('oldImages', value.uid);
       })
     }
     Object.entries(values).forEach(([key, value]:any)=>{
@@ -183,10 +243,14 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
     })
 
     try {
-      await axiosClient.patch(`/products/update/${selectedProduct.productId}`, formData);
+      await axiosClient.patch(`/products/update/${selectedProduct.productId}`, formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       getProducts();
       setSelectedProduct(null);
-      message.success('Product updated successfully!');
+      message.success('Cập nhật thành công!');
     } catch (error) {
       console.log('Error:', error);
     }
@@ -194,7 +258,11 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
   const handleRemove = async(productId:number) =>{
     try {
-      await axiosClient.delete(`/products/remove/${productId}`);
+      await axiosClient.delete(`/products/remove/${productId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       getProducts();
       message.success('Đã xóa!');
     } catch (error) {
@@ -204,7 +272,11 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
     const handleDelete = async (productId: number) => {
     try {
-      await axiosClient.delete(`/products/delete/${productId}`);
+      await axiosClient.delete(`/products/delete/${productId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       getProducts();
       message.success('Đã xóa!')
     } catch (error) {
@@ -215,7 +287,11 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
   const handleRestore  = async (categoryId: number) => {
     try {
-      await axiosClient.post(`/products/restore/${categoryId}`)
+      await axiosClient.post(`/products/restore/${categoryId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      })
       getProducts();
       message.success('Khôi phục thành công!')
     } catch (error) {
@@ -226,7 +302,11 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
   const onDelete = async (productId: number) => {
     try {
-      await axiosClient.delete(`/products/remove${productId}`);
+      await axiosClient.delete(`/products/remove${productId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       getProducts();
       message.success('Product deleted successfully!');
     } catch (error) {
@@ -352,16 +432,22 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
                 icon={<EditOutlined />}
                 onClick={() => {
                   setSelectedProduct(record);
-                 
                   let tmp = record.images.map((value:any)=>{
                     return {
                     uid: value.imageId.toString(),
                     name: value.uri.split('-').pop(),
                     status: 'done',
-                    url: process.env.REACT_APP_API_BASE_URL + '/' + value.uri
+                    url: process.env.REACT_APP_API_BASE_URL + '/' + value.uri,
+                    cover: value.cover
                     }
                   }) 
-                  setFileList(tmp)
+                  setFileList([])
+                  // setCover(record.map((value:any)=>))
+                  const coverImage = record.images.map((value:any)=> {if(value.cover) return value.uri.split('-').pop()})
+                  .find((item:any) => typeof item === 'string')
+                  setCover(coverImage)
+                  console.log(coverImage);  
+                  setFileListUpdate(tmp)
                   updateForm.setFieldsValue(record);
                 }}
               />
@@ -402,7 +488,11 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
   const checkNameUnique = debounce( async(cb:any, value: string, ignore?:string) => {
     try{
-      await axiosClient.get(`/products/check/unique?field=name&value=${value}&ignore=${ignore}`)
+      await axiosClient.get(`/products/check/unique?field=name&value=${value}&ignore=${ignore}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      })
       cb(undefined)
     } catch(error) {
       cb(true)
@@ -520,8 +610,8 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
               )}
             </Form.List>
             <Divider/>
-<Form.Item name="images" label="Upload ảnh"
- valuePropName="fileList" getValueFromEvent={e => Array.isArray(e) ? e : e && [e.file]}>
+    <Form.Item name="images" label="Upload ảnh"
+     valuePropName="fileList" getValueFromEvent={e => Array.isArray(e) ? e : e && [e.file]}>
       <Upload
         multiple
         maxCount={5}
@@ -567,7 +657,7 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
       </Card>
 
       <Modal
-          width={900} // Điều chỉnh chiều rộng của modal
+        width={900} // Điều chỉnh chiều rộng của modal
         centered
         title='Chỉnh sửa món'
         open={selectedProduct}
@@ -578,6 +668,9 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
         }}
         onCancel={() => {
           setSelectedProduct(null);
+          setFileList([])
+          setFileListUpdate([])
+          setCover(null)
         }}
       >
         <Form form={updateForm} initialValues={selectedProduct?.productSize} name='update-product' labelCol={{ span: 4 }} wrapperCol={{ span: 16 }} onFinish={onUpdate}>
@@ -678,33 +771,57 @@ type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
               )}
             </Form.List>
             <Divider/>
-            <Form.Item name="images" label="Upload ảnh"
- valuePropName="fileList" getValueFromEvent={e => Array.isArray(e) ? e : e && [e.file]}>
-      <Upload
-        multiple
-        maxCount={5}
-        action="https://localhost:9999/upload"
-        listType="picture-card"
-        fileList={fileList}
-        onPreview={handlePreview}
-        onChange={handleChange}
-        beforeUpload={(file) => checkExist(file)}
-      >
-        {fileList.length >= 5 ? null : uploadButton}
-      </Upload>
-      {previewImage && (
-        <Image
-          wrapperStyle={{ display: 'none' }}
-          preview={{
-            visible: previewOpen,
-            onVisibleChange: (visible) => setPreviewOpen(visible),
-            afterOpenChange: (visible) => !visible && setPreviewImage(''),
-          }}
-          src={previewImage}
-        />
-      )}
-        </Form.Item>
-        {fileList.length == 0 ? null : coverList}
+            <Form.Item name="oldImages" label="ảnh"
+            valuePropName="fileList" getValueFromEvent={e => Array.isArray(e) ? e : e && [e.file]}>
+              <Upload
+                multiple
+                maxCount={5}
+                listType="picture-card"
+                fileList={fileListUpdate}
+                onPreview={handlePreview}
+                onChange={handleChangeUpdate}
+                beforeUpload={(file) => checkExist(file)}
+              >
+              </Upload>
+              {previewImage && (
+                <Image
+                  wrapperStyle={{ display: 'none' }}
+                  preview={{
+                    visible: previewOpen,
+                    onVisibleChange: (visible) => setPreviewOpen(visible),
+                    afterOpenChange: (visible) => !visible && setPreviewImage(''),
+                  }}
+                  src={previewImage}
+                />
+              )}
+              </Form.Item>
+              <Form.Item name="images" label="Upload ảnh mới"
+                valuePropName="fileList" getValueFromEvent={e => Array.isArray(e) ? e : e && [e.file]}>
+              <Upload
+                multiple
+                maxCount={5-fileListUpdate.length}
+                action="https://localhost:9999/upload"
+                listType="picture-card"
+                fileList={fileList}
+                onPreview={handlePreview}
+                onChange={handleChange}
+                beforeUpload={(file) => checkExist(file)}
+              >
+                {(fileListUpdate.length + fileList.length) >= 5 ? null : uploadButton}
+              </Upload>
+              {previewImage && (
+                <Image
+                  wrapperStyle={{ display: 'none' }}
+                  preview={{
+                    visible: previewOpen,
+                    onVisibleChange: (visible) => setPreviewOpen(visible),
+                    afterOpenChange: (visible) => !visible && setPreviewImage(''),
+                  }}
+                  src={previewImage}
+                />
+              )}
+              </Form.Item>
+              {coverList}
         </Form>
       </Modal>
     </div>

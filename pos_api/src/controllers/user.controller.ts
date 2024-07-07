@@ -9,7 +9,7 @@ const repository = AppDataSource.getRepository(User);
 
 const getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const users = await repository.find();
+        let users = await repository.find({relations: ['status', 'ward.district.province'], order: {createdAt: 'DESC'}, select: ['userId', 'firstName', 'lastName', 'gender', 'email', 'phoneNumber', 'address', 'wardId', 'ward', 'statusId', 'status', 'role', 'createdAt', 'updatedAt', 'deletedAt']});
         if (users.length === 0) {
             return res.status(204).json({
                 error: 'No content',
@@ -75,8 +75,10 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
             return res.status(410).json({ error: 'Not found' });
         }
         let data = req.body;
-        const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
-        data['password'] = hashedPassword;
+        if(data.password) {            
+            const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
+            data['password'] = hashedPassword;
+        }
 
         Object.assign(user, data);
         await repository.save(user);

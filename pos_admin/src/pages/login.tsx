@@ -13,6 +13,7 @@ const Login: React.FC = () => {
   if (isLoggedIn) {
     return <Navigate to="/" />;
   }
+
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
@@ -30,7 +31,11 @@ const Login: React.FC = () => {
           sessionStorage.setItem("accessToken", response.data.token);
           sessionStorage.setItem("user", JSON.stringify(response.data.user));
         }
-        navigate("/dashboard");
+        if (JSON.stringify(response.data.user.role != 'Quản trị viên' )) {
+          navigate("/orders");
+        } else {
+          navigate("/");
+        }
         message.success("Đăng nhập thành công!");
       } else {
         message.error('Dữ liệu rỗng')

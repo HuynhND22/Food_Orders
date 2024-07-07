@@ -27,16 +27,11 @@ const Product = ({ params: { id } }: any) => {
   const getOrder = async () => {
     try {
       const response = await axiosClient.get(`/orders/id/${id}`);
+      const totalPrice = await axiosClient.get(`/orders/total-price/${id}`);
       setOrder(response.data);
-
-      let total = 0
-      response.data.orderDetails?.map(
-        (value: any) => {
-          total = total + value.price
-          console.log(total);  
-        }
-      );
-      setPrice(total)
+      
+      setPrice(totalPrice.data[0].TotalPrice)
+      console.log(totalPrice.data[0].TotalPrice);  
     } catch (error) {
       console.log(error);
     }
@@ -142,9 +137,9 @@ const Product = ({ params: { id } }: any) => {
     const handlePayment = async () => {
       try{
         QR()
-        // await axiosClient.post(`/payments/handler/${id}`)
+        await axiosClient.post(`/payments/handler/${id}`)
         message.success('Thành công')
-        // qrModal.destroy();
+        qrModal.destroy();
         getOrder()
       }catch (error) {
         console.log(error);
@@ -204,7 +199,7 @@ const Product = ({ params: { id } }: any) => {
             </div>
             <Divider/>
             <div className='flex justify-center'> 
-              <Button type='primary' block width={100} onClick={confirm} styles={{}}>Huỷ đơn</Button>  
+              <Button type='primary' block onClick={confirm}>Huỷ đơn</Button>  
             </div>
           </div>
         }

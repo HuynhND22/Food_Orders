@@ -50,7 +50,7 @@ export class OrderDetail extends BaseEntity {
   })
   productSize: ProductSize;
 
-  @ManyToOne(() => Promotion, (pr) => pr.orderDetails)
+  @ManyToOne(() => Promotion, (pr) => pr.orderDetails, { onDelete: 'CASCADE' })
   @JoinColumn({
     name: "promotionId"
   })

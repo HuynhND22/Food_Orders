@@ -45,7 +45,7 @@ export class Promotion extends BaseEntity {
   @OneToMany(() => OrderDetail, (od) => od.promotion)
   orderDetails: OrderDetail[];
 
-  @ManyToOne(() => Status, (s) => s.promotions)
+  @ManyToOne(() => Status, (s) => s.promotions, {onDelete: 'CASCADE'} )
   @JoinColumn({
     name: "statusId",
     referencedColumnName: 'statusId'

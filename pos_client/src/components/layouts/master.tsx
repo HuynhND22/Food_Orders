@@ -6,13 +6,22 @@ import Search from "antd/es/input/Search";
 import Header from "./header";
 import Nav from "./navMenu";
 import Cart from "./cart";
+import { useRouter } from "next/navigation";
 
 const { Content } = Layout;
 
 export default function Master({ children }: any) {
+  const router = useRouter();
+
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+
+  const onSearch = (value:string) => {
+    if (value.trim()) {
+      router.push(`/categories?search=${encodeURIComponent(value)}`);
+    }
+  }
 
   return (
  <ConfigProvider
@@ -25,7 +34,7 @@ export default function Master({ children }: any) {
     <main className=" bg-slate-400 relative rounded-lg">
       <Header />
       <div className="bg-[#ffba00] w-[100%] h-18 sticky top-0 mt-16 z-20">
-        <Search placeholder="Tìm kiếm" className=" pb-4 p-5" />
+        <Search placeholder="Tìm kiếm" className=" pb-4 p-5" onSearch={(value:string)=>onSearch(value)} />
       </div>
       <Layout>
         <Content style={{ padding: "" }}>

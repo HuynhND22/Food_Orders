@@ -37,23 +37,6 @@ export class Order extends BaseEntity {
   @OneToMany(() => OrderDetail, (od) => od.order)
   orderDetails: OrderDetail[];
 
-//   @ManyToMany(
-//     () => Product, 
-//     p => p.orders, //optional
-//     {onDelete: 'NO ACTION', onUpdate: 'NO ACTION'})
-//     @JoinTable({
-//       name: 'products',
-//       joinColumn: {
-//         name: 'orderId',
-//         referencedColumnName: 'orderId',
-//       },
-//       inverseJoinColumn: {
-//         name: 'productId',
-//         referencedColumnName: 'productId',
-//       },
-//     })
-//     products: Product[];
-
     @ManyToOne(() => User, (u) => u.orders)
     @JoinColumn({
       name: 'userId',

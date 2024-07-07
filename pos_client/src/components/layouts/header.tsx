@@ -1,13 +1,16 @@
 "use client";
+import Image from 'next/image'
 
 export default function Header() {
   return (
     <header className="rounded-t-lg w-[100%] fixed top-1 p-2 z-10 bg-[#ffba00]">
       <div className=" w-[100%] flex justify-center ">
-        <img
-          src="/images/logo/logo-transparent.png"
+        <Image
+          src="http://localhost:9999/logo/logo.svg"
           alt="logo order food"
-          className="w-[50%] h-[50%]"
+          style={{ width: '50%', height: 'auto' }}
+          width={200}
+          height={40}
         />
       </div>
     </header>

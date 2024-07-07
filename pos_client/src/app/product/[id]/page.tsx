@@ -9,15 +9,47 @@ import { Carousel, Divider, Image, Radio, RadioChangeEvent, Card, Button, Form, 
 import Nav from "@/components/layouts/navMenu";
 import withQRCode from "@/utils/withQRCode";
 import Cookie from 'js-cookie'
+import useSocket from '../../../components/socket/SocketComponent';
 
 const Product = ({ params: { id } }: any) => {
+  // const socket = useSocket('http://localhost:9999');
+  // const [messages, setMessages] = React.useState<string[]>([]);
+  //   const [message, setMessage] = React.useState<string>('');
+
+  //   React.useEffect(() => {
+  //       if (socket) {
+  //           socket.on('message', (msg: string) => {
+  //               setMessages((prev) => [...prev, msg]);
+  //           });
+  //       }
+  //   }, [socket]);
+
+  //   const sendMessage = () => {
+  //       if (socket && message) {
+  //           socket.emit('message', message);
+  //           setMessage('');
+  //       }
+  //   };
+
+
+  //   {messages.map((msg, index) => (
+  //       <div key={index}>{msg}</div>
+  //   ))}
+  //   <input
+  //       type="text"
+  //       value={message}
+  //       onChange={(e) => setMessage(e.target.value)}
+  //   />
+  //   <button onClick={sendMessage}>Send</button>
+
   const [product, setProduct] = React.useState<any>([]);
   const [related, setRelated] = React.useState<any>([]);
   const [sizes, setSiezs] = React.useState<any>([]);
   const [size, setSize] = React.useState<any>([]);
   const [price, setPrice] = React.useState<any>();
   const [cost, setCost] = React.useState<any>();
-  const [quantity, setQuantity] = React.useState(1);
+  const [quantity, setQuantity] = React.useState<any>(1);
+  const [limit, setLimit] = React.useState<any>(99);
 
 
   const getProduct = async () => {
@@ -37,7 +69,6 @@ const Product = ({ params: { id } }: any) => {
   };
   React.useEffect(() => {   
     getProduct();
-    console.log(product);  
   }, []);
 
   const router = useRouter();
@@ -56,7 +87,7 @@ const Product = ({ params: { id } }: any) => {
     console.log("radio4 checked", value);
     setSize(value);
     Object.entries(product.productSizes).filter((item: any) => {
-      console.log(item);  
+      setLimit(item[1].stock)
       if (item[1].productSizeId === value) {
         if (item[1].discount == 0) {
           setPrice(item[1].price);
@@ -153,7 +184,7 @@ const Product = ({ params: { id } }: any) => {
             <TiMinus size={10} />
           </Button>
           <InputNumber
-            onChange={(value:number) => {
+            onChange={(value:number | null) => {
               setQuantity(value)
             }}
             className="w-[40px]"
@@ -169,9 +200,10 @@ const Product = ({ params: { id } }: any) => {
             <TiPlus size={10} />
           </Button>
           </span>
+          <div className='text-red-500' style={quantity > limit ? {display: 'block'} : {display: 'none'}}>Vượt quá số lượng hiện có</div>
             </Form.Item>
           <div className='py-5 flex justify-center'>
-            <Button type='primary' icon={<ShoppingCartOutlined />} htmlType="submit">
+            <Button type='primary' icon={<ShoppingCartOutlined />} htmlType="submit" disabled={quantity > limit ? true : false}>
               Thêm vào giỏ hàng
             </Button>
           </div>
@@ -193,7 +225,6 @@ const Product = ({ params: { id } }: any) => {
                // actions={[<Button onClick={()=>{}}><ShoppingCartOutlined /></Button>]}
               cover={
                 <Image
-                minScale={1}
                   preview={false}
                   alt="example"
                   src={value.images?.map((image: any) =>

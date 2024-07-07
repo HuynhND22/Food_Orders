@@ -236,6 +236,34 @@ const hardDelete = async (req: Request, res: Response, next: NextFunction) => {
 
 }
 
+const updateStatus = async (req:Request, res:Response) =>{
+    try {
+        const orderId = parseInt(req.params.id);
+        const statusId = parseInt(req.body.statusId);
+        const found = await orderRepository.findOneBy({orderId: orderId});
+        if (!found) return res.status(410).json({error: 'not found'})
+
+        Object.assign(found, {statusId: statusId})
+        await orderRepository.save(found)
+        return res.sendStatus(200)
+    } catch (error) {
+        console.log(error);    
+        return res.status(500).json({error: 'Internal server error'})
+    }
+}
+
+const getTotalPrice = async (req:Request, res:Response) => {
+    try{
+        const orderId = req.params.id;
+        const totalPrice = await orderRepository.manager.query(`EXEC CalculateTotalPrice @OrderId = ${orderId}`);
+        if(!totalPrice) return res.status(400)
+        return res.json(totalPrice)
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({error: 'Internal server error'})
+    }
+}
+
 export default {getAll, 
                 getById,
                 getByTableId,
@@ -245,5 +273,7 @@ export default {getAll,
                 softDelete,
                 restore,
                 getDeleted, 
-                hardDelete
+                hardDelete,
+                updateStatus,
+                getTotalPrice
             }

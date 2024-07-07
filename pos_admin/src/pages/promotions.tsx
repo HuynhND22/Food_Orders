@@ -8,6 +8,8 @@ import axiosClient from '../configs/axiosClient';
 import { useRequest } from 'ahooks';
 import {getDefaultDate} from '../helpers/getDate'
 import dayjs from 'dayjs'
+import {debounce} from "ahooks/es/utils/lodash-polyfill";
+
 type Props = {};
 export default function Promotions({ }: Props) {
     const { RangePicker } = DatePicker;
@@ -38,7 +40,11 @@ export default function Promotions({ }: Props) {
 
     const getPromotions = async () => {
         try {
-            const response = await axiosClient.get(`/promotions/${deleted}`);
+            const response = await axiosClient.get(`/promotions/${deleted}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
             console.log(response.data);  
             setPromotions(response.data);
         } catch (error) {
@@ -48,7 +54,11 @@ export default function Promotions({ }: Props) {
 
     const getStatus = async () => {
         try {
-            const response = await axiosClient.get('/status/promotions');
+            const response = await axiosClient.get('/status/promotions', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
             setStatus(response.data);
         } catch (error) {
             console.log('Error:', error);
@@ -56,7 +66,11 @@ export default function Promotions({ }: Props) {
     };
     const getProducts = async () => {
         try {
-            const response = await axiosClient.get('/products/all');
+            const response = await axiosClient.get('/products/client', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
             setProducts(response.data);
         } catch (error) {
             console.log('Error:', error);
@@ -71,21 +85,32 @@ export default function Promotions({ }: Props) {
 
     const onFinish = async (values: any) => {
         console.log(values);  
-        // try {
-        //     console.log('Success:', values);
-        //     const response = await axiosClient.post('/promotions/create', values);
-        //     console.log(response.data);
-        //     getPromotions();
-        //     createForm.resetFields();
-        // } catch (error) {
-        //     console.log('Error:', error);
-        // }
+
+        try {
+            values['startDate'] = dayjs(values.duration[0]).format('YYYY-MM-DD')
+            values['endDate'] = dayjs(values.duration[1]).format('YYYY-MM-DD')
+            console.log('Success:', values);
+            const response = await axiosClient.post('/promotions/create', values, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+            console.log(response.data);
+            getPromotions();
+            createForm.resetFields();
+        } catch (error) {
+            console.log('Error:', error);
+        }
     };
 
     const onUpdate = async (values: any) => {
         try {
             console.log('Success:', values);
-            await axiosClient.patch(`/promotions/update/${selectedPromotion.promotionId}`, values);
+            await axiosClient.patch(`/promotions/update/${selectedPromotion.promotionId}`, values, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
             getPromotions();
             setSelectedPromotion(null);
             message.success('Cập nhật thành công!');
@@ -97,7 +122,11 @@ export default function Promotions({ }: Props) {
 
   const handleRemove = async (promotions: number) => {
     try {
-      await axiosClient.delete(`/promotions/remove/${promotions}`);
+      await axiosClient.delete(`/promotions/remove/${promotions}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       getPromotions();
       message.success('Đã xóa!');
     } catch (error) {
@@ -107,7 +136,11 @@ export default function Promotions({ }: Props) {
 
   const handleDelete = async (promotions: number) => {
     try {
-      await axiosClient.delete(`/promotions/delete/${promotions}`);
+      await axiosClient.delete(`/promotions/delete/${promotions}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       getPromotions();
       message.success('Đã xóa!')
     } catch (error) {
@@ -118,7 +151,11 @@ export default function Promotions({ }: Props) {
 
   const handleRestore  = async (promotions: number) => {
     try {
-      await axiosClient.post(`/promotions/restore/${promotions}`)
+      await axiosClient.post(`/promotions/restore/${promotions}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      })
       getPromotions();
       message.success('Khôi phục thành công!')
     } catch (error) {
@@ -190,14 +227,10 @@ export default function Promotions({ }: Props) {
             with: '10%'
         },
         {
-          title: deleted === 'all' ? 'Ngày tạo - Cập nhật gần nhất' : 'Ngày xoá',
+          title: 'Ngày bắt đầu - kết thúc',
           key: 'createdAt',
           render: (text: any, record: any) => {
-            if (deleted == 'all') {
-              return <span>{dayjs(record.createdAt).format( 'HH:mm DD/MM/YYYY')} - {dayjs(record.updatedAt).format( 'HH:mm DD/MM/YYYY')}</span>
-            } else {
-              return <span>{dayjs(record.deletedAt).format( 'HH:mm DD/MM/YYYY')}</span>
-            }
+            return <span>{dayjs(record.startDate).format( 'DD/MM/YYYY')} - {dayjs(record.endDate).format( 'DD/MM/YYYY')}</span>
           }
         },
           {
@@ -213,10 +246,19 @@ export default function Promotions({ }: Props) {
                       <Button
                           type='primary'
                           icon={<EditOutlined />}
-                          onClick={() => {
-                            setSelectedPromotion(record);
-                            updateForm.setFieldsValue(record);
-                            updateForm.setFieldValue('productId', 123)
+                          onClick={async() => {
+                            await setSelectedPromotion(record);
+                            console.log(record);
+                            await updateForm.setFieldsValue(record);
+                            // let a: any = []
+                            // let b: any = []
+                            // await record.promotionDetails.map((value:any) => {
+                            //   a.push(value.productSize.productId);
+                            //   b.push(value.productSize.sizeId);
+                            // })
+                            // console.log(a)
+                            // await updateForm.setFieldValue('productId', a);
+                            // await updateForm.setFieldValue('productId', a);
                           }}
                       />
                     </Tooltip>
@@ -253,6 +295,20 @@ export default function Promotions({ }: Props) {
           },
         },
     ];
+
+    const checkNameUnique = debounce( async(cb:any, value: string, ignore?:string) => {
+      try{
+        await axiosClient.get(`/promotions/check/unique?field=name&value=${value}&ignore=${ignore}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      })
+        cb(undefined)
+      } catch(error) {
+        cb(true)
+      }
+    }, 500)
+
     return (
         <div style={{ padding: 36 }}>
             <Card title='Thêm mới Khuyến mãi' style={{ width: '100%' }}>
@@ -264,16 +320,9 @@ export default function Promotions({ }: Props) {
                         rules={[
                             { required: true, message: 'Tên khuyến mãi là bắt buộc!' },
                             {
-                                validator(rule, value, callback) {
-                                    callback()
-                                    // checkNameUniqueDebounce(value);
-                                    // console.log(data);
-                                    // if (data === true) {
-                                    //     callback('Name must be unique!');
-                                    // } else {
-                                    //     callback();
-                                    // }
-                                },
+                              validator(rule, value, callback) {
+                                checkNameUnique(callback, value)
+                              },message: 'Khuyến mãi đã tồn tại!'
                             },
                         ]}
                         hasFeedback
@@ -421,16 +470,10 @@ export default function Promotions({ }: Props) {
                         name='name'
                         rules={[
                             { required: true, message: 'Tên là bắt buộc!' },
-                            {
-                                validator(rule, value, callback) {
-                                    // checkNameUniqueDebounce(value);
-                                    // console.log(data);
-                                    // if (data === true) {
-                                    //     callback('Name must be unique!');
-                                    // } else {
-                                    //     callback();
-                                    // }
-                                },
+                             {
+                              validator(rule, value, callback) {
+                                checkNameUnique(callback, value, selectedPromotion.name)
+                              },message: 'Khuyến mãi đã tồn tại!'
                             },
                         ]}
                         hasFeedback
@@ -457,13 +500,23 @@ export default function Promotions({ }: Props) {
                     <Form.Item<FieldType> label='Giá' labelCol={{ span: 4 }} name='price' rules={[{ required: true, type: 'number', min: 1 }]}>
                         <InputNumber suffix={'đ'} />
                     </Form.Item>
+                    <Form.Item label='Thời gian' name='duration'  rules={[{required:true, message: 'Thời hạn là bắt buộc!'}]} >
+                        <RangePicker
+                        format='DD/MM/YYYY'
+                        defaultValue={[dayjs(selectedPromotion?.startDate, 'YYYY/MM/DD'), dayjs(selectedPromotion?.endDate, 'YYYY/MM/DD')]}
+                         onChange={(dates, dateString)=>{
+                            setDuration(dateString)
+                        }} />    
+                    </Form.Item>
                      {/* list Promotion */}
                      <Form.List  name='promotionDetails' >
                             {(fields, { add, remove }) => (
                                 <>
                                     {fields.map((field, index) => (
                                         <Space key={field.key} style={{ display: 'flex', marginBottom: 10 , paddingLeft:40}}  align='baseline'>
-                                            <div key={field.key}>
+
+                                            <Input type="hidden" name="productSizeId"/>
+                                            
                                             <Form.Item
                                                 {...field}
                                                 name={[field.name, 'productId']}
@@ -477,11 +530,9 @@ export default function Promotions({ }: Props) {
                                                         })
                                                     }}
                                                     onChange={(value, object:any)=>{
-                                                        console.log(field);
-                                                        // console.log(selectedPromotion)
-                                                        setSizes(object?.productSizes)
-                                                       // console.log(object.productSizes);
-                                                    }}
+                                                       setSizes(object?.productSizes)
+                                                       console.log(object.productSizes);
+                                                   }}
                                                     style={{minWidth: 150}}
                                                     options={products.map((item: any) => {
                                                         return {
@@ -493,26 +544,20 @@ export default function Promotions({ }: Props) {
                                                     })}
                                                 />
                                             </Form.Item>
-                                            </div>
                                             <Form.Item
                                                 {...field}
-                                                name={[field.name, 'sizeId']}
-                                                fieldKey={[field.fieldKey ?? index, 'sizeId']} // Use index as fallback
-                                                label='Size'
-                                                // labelCol={{span: 18}}
+                                                name={[field.name, 'productSizeId']}
+                                                fieldKey={[field.fieldKey ?? index, 'productSizeId']} // Use index as fallback
+                                                label='Size'  labelCol={{ span: 8 }}
+                                                  rules={[{required: true, message: 'Size là bắt buộc!'}]}
                                             >
-                                                <Select
-                                                   onChange={(value, object:any)=>{
-                                                       setSizes(object?.productSizes)
-                                                       console.log(updateForm.getFieldsValue());
-                                                   }}
+                                               <Select
                                                    style={{minWidth: 150}}
-                                                    options={sizes.map((item: any) => {
+                                                    options={sizes?.map((item: any) => {
                                                         return {
-                                                            label: item.name,
-                                                            value: item.productId,
-                                                            productSizes: item.productSizes,
-                                                            key: item.productId
+                                                            key: item.size?.sizeId,
+                                                            label: `${item.size?.name}[${numeral(item.price).format('0,0')}đ]`,
+                                                            value: item.productSizeId,
                                                         };
                                                     })}
                                                 />

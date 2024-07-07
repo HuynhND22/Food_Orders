@@ -34,6 +34,7 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
+   requestTimeout: 60000,
   // entities: ['entities/**/*.entity{.ts,.js}', 'entities/**/*.schema{.ts,.js}'],
   entities: [
     Cart,
@@ -57,11 +58,11 @@ export const AppDataSource = new DataSource({
     ActivateUser,
     BankInfomation
   ],
-  migrations: [
-    // join(__dirname, '**', '*.\.{ts,js}')
-    // "src/migrations/**/*.ts"
-    'dist/**/*.entity.ts'
-  ],
+  // migrations: [
+  //   // join(__dirname, '**', '*.\.{ts,js}')
+  //   // "src/migrations/**/*.ts"
+  //   'dist/**/*.entity.ts'
+  // ],
   // migrations: [
   //   checkCartsUnique
   // ],

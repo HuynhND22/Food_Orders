@@ -20,6 +20,7 @@ import ordersRouter from './routes/orders';
 import authRouter from './routes/authentications';
 import statusRouter from './routes/status';
 import sizeRouter from './routes/size';
+import statisticsRouter from './routes/statistics';
 import bodyParser from 'body-parser';
 import { Server, Socket } from 'socket.io';
 
@@ -60,6 +61,7 @@ AppDataSource.initialize().then(async () => {
   app.use('/auth', authRouter);
   app.use('/status', statusRouter);
   app.use('/sizes', sizeRouter);
+  app.use('/statistics', statisticsRouter);
   app.use('/', indexRouter);
 
   // catch 404 and forward to error handler
@@ -80,28 +82,28 @@ AppDataSource.initialize().then(async () => {
   });
 });
 
-export function initSocketIO(httpServer: http.Server) {
-  const io = new Server(httpServer, {
-    cors: {
-      origin: "http://localhost:3000",
-      methods: ["GET", "POST"]
-    }
-  });
+// export function initSocketIO(httpServer: http.Server) {
+//   const io = new Server(httpServer, {
+//     cors: {
+//       origin: "http://localhost:3000",
+//       methods: ["GET", "POST"]
+//     }
+//   });
 
-  io.on('connection', (socket: Socket) => {
-    console.log('A user connected');
+//   io.on('connection', (socket: Socket) => {
+//     console.log('A user connected');
     
-    socket.on('message', (message) => {
-      console.log('Received message:', message);
-      io.emit('message', message);
-    });
+//     socket.on('message', (message) => {
+//       console.log('Received message:', message);
+//       io.emit('message', message);
+//     });
 
-    socket.on('disconnect', () => {
-      console.log('A user disconnected');
-    });
-  });
+//     socket.on('disconnect', () => {
+//       console.log('A user disconnected');
+//     });
+//   });
 
-  return io;
-}
+//   return io;
+// }
 
 export default app;

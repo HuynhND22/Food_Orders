@@ -8,9 +8,10 @@ import Promotions from "../../pages/promotions";
 import Users from "../../pages/users";
 import Tables from "../../pages/tables";
 import Banks from "../../pages/banks";
+import Home from "../../pages/home";
 import Styles from "../../styles/layout/layout.module.css";
-import { UserOutlined } from "@ant-design/icons";
-import {Avatar, Button, Space} from "antd";
+import { HomeOutlined } from "@ant-design/icons";
+import {Avatar, Button, Space, Breadcrumb} from "antd";
 import NotPermisstion from "../../pages/notPermisstion";
 
 function Layout() {
@@ -22,6 +23,13 @@ function Layout() {
     sessionStorage.removeItem('user')
     navigate('/login')
   }
+  const user:any = localStorage.getItem('user') ?? sessionStorage.getItem('user')
+  const name = JSON.parse(user).name
+
+  const isAdmin = JSON.parse(user).role
+
+       
+
   return (
     <div className={Styles.container}>
       {/*<Router>*/}
@@ -30,25 +38,51 @@ function Layout() {
             <span>
               <Space direction="horizontal" size={10}>
                 <Space wrap size={16}></Space>
-                <Avatar size={64} icon={<UserOutlined />} />
+                <Avatar size={64} icon={<HomeOutlined onClick={()=>{navigate('/')}} />} />
+                <div style={{color:'white'}}>
+                {
+                  name
+                }
+                </div>
               </Space>
             </span>
           </div>
           <div className={Styles.item}>
-            <Link to="/">Danh mục</Link>
-            <Link to="/tables">Bàn</Link>
-            <Link to="/suppliers">Nhà cung cấp</Link>
-            <Link to="/products">Món ăn</Link>
-            <Link to="/orders">Đơn gọi món</Link>
-            <Link to="/promotions">Khuyến mãi</Link>
-            <Link to="/users">Người dùng</Link>
-            <Link to="/banks">Thông tin ngân hàng</Link>
-            <Button onClick={()=>logout()}>Đăng xuất</Button>
+            {
+              isAdmin == "Quản trị viên" && <Link to="/categories">Danh mục</Link>
+            }
+            {
+              isAdmin == "Quản trị viên" && <Link to="/tables">Bàn</Link>
+            }
+            {
+              isAdmin == "Quản trị viên" && <Link to="/suppliers">Nhà cung cấp</Link>
+            }
+            {
+              isAdmin == "Quản trị viên" && <Link to="/products">Món ăn</Link>
+            }
+            {
+              isAdmin == "Quản trị viên" && <Link to="/orders">Đơn gọi món</Link>
+            }
+            {
+              isAdmin == "Quản trị viên" && <Link to="/promotions">Khuyến mãi</Link>
+            }
+            {
+              isAdmin == "Quản trị viên" && <Link to="/users">Người dùng</Link>
+            }
+            {
+              isAdmin == "Quản trị viên" && <Link to="/banks">Thông tin ngân hàng</Link>
+            }
+            
+            <div style={{ margin:10, marginLeft:100 }}>
+              <Button onClick={()=>logout()}>Đăng xuất</Button>
+            </div>
           </div>
         </nav>
-        <h1>Admin Management</h1>
+        <h2>
+       
+        </h2>
         <Routes>
-          <Route path="/" element={<Categories />} />
+          <Route path="/" element={<Home />} />
           <Route path="/categories" element={<Categories />} />
           <Route path="/tables" element={<Tables />} />
           <Route path="/suppliers" element={<Suppliers />} />

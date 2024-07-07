@@ -14,7 +14,11 @@ const Categories: React.FC = () => {
 
   const getBanks = async () => {
     try {
-      const response = await axiosClient.get('/payments/banks/all');
+      const response = await axiosClient.get('/payments/banks/all', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       if(response.data) {
         console.log(response.data);  
         setBanks(response.data)
@@ -32,7 +36,11 @@ const Categories: React.FC = () => {
   const handleUpdate = async (values: any) => {
     console.log(values);   
     try {
-      await axiosClient.patch('/payments/banks/update', values);
+      await axiosClient.patch('/payments/banks/update', values, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
       getBanks();
       createForm.resetFields();
       message.success('Cập nhật thành công!')
