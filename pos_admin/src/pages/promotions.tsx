@@ -173,8 +173,8 @@ export default function Promotions({ }: Props) {
         },
         {
             title: 'Giới hạn sử dụng',
-            dataIndex: 'limit',
-            key: 'limit',
+            dataIndex: 'quota',
+            key: 'quota',
             width: '10%',
         },
         {
@@ -342,7 +342,7 @@ export default function Promotions({ }: Props) {
                     </Form.Item>
 
                     {/* input limit */}
-                    <Form.Item<FieldType> label='Limit' name='limit' rules={[{ required: true, type: 'number', min: 1 }]}>
+                    <Form.Item<FieldType> label='Limit' name='quota' rules={[{ required: true, type: 'number', min: 1 }]}>
                         <InputNumber />
                     </Form.Item>
                     {/* price*/}
@@ -493,7 +493,7 @@ export default function Promotions({ }: Props) {
                     </Form.Item>
 
                     {/* input limit */}
-                    <Form.Item<FieldType> label='Giới hạn' labelCol={{ span: 4 }} name='limit' rules={[{ required: true, type: 'number', min: 1 }]}>
+                    <Form.Item<FieldType> label='Giới hạn' labelCol={{ span: 4 }} name='quota' rules={[{ required: true, type: 'number', min: 1 }]}>
                         <InputNumber />
                     </Form.Item>
                     {/* price*/}

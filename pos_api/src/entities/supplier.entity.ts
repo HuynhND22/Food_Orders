@@ -1,42 +1,39 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
+import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { IsNotEmpty, validateOrReject } from 'class-validator';
 import { Product } from './product.entity';
 import { Ward } from './ward.entity';
 
-@Entity({ name: 'Supplier' })
+@Entity({ name: 'suppliers' })
 export class Supplier extends BaseEntity {
-  @PrimaryGeneratedColumn({ primaryKeyConstraintName: 'supplierId' })
+  @PrimaryGeneratedColumn({ name: 'supplier_id' })
   supplierId: number;
-  // @MaxLength(11)
-  @IsNotEmpty()
 
-  @Column({type: 'nvarchar', length: 255 })
+  @IsNotEmpty()
+  @Column({ type: 'varchar', length: 255, name: 'name' })
   name: string;
-  
-  @Column({unique: true ,type: 'nvarchar', length: 255 })
+
+  @Column({ unique: true, type: 'varchar', length: 255, name: 'email' })
   email: string;
-  
-  @Column({unique: true ,type: 'nvarchar', length: 15, nullable: true })
+
+  @Column({ unique: true, type: 'varchar', length: 15, nullable: true, name: 'phone_number' })
   phoneNumber?: string;
 
-  @Column({type: 'nvarchar', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true, name: 'address' })
   address: string;
 
-  @Column({type: 'int', nullable: true})
+  @Column({ type: 'int', nullable: true, name: 'ward_id' })
   wardId?: number;
-  // @MaxLength(11)
 
-  @Column({type: 'int'})
+  @Column({ type: 'int', name: 'status_id' })
   statusId: number;
-  // @MaxLength(11)
 
-  @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
+  @CreateDateColumn({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP", name: 'created_at' })
   createdAt: String;
 
-  @UpdateDateColumn({ type: "datetime", default: () => "GETUTCDATE()", nullable:true, onUpdate: "GETUTCDATE()" })
+  @UpdateDateColumn({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP", nullable: true, onUpdate: "CURRENT_TIMESTAMP", name: 'updated_at' })
   updatedAt?: String;
 
-  @DeleteDateColumn({nullable: true})
+  @DeleteDateColumn({ nullable: true, name: 'deleted_at' })
   deletedAt?: String;
 
   @OneToMany(() => Product, (p) => p.supplier)
@@ -44,12 +41,11 @@ export class Supplier extends BaseEntity {
 
   @ManyToOne(() => Ward, (w) => w.suppliers)
   @JoinColumn({
-    name: 'wardId',
+    name: 'ward_id',
     referencedColumnName: 'wardId'
   })
   ward: Ward;
 
-  // HOOKS (AUTO VALIDATE)
   @BeforeInsert()
   @BeforeUpdate()
   async validate() {

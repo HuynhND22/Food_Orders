@@ -1,3 +1,3 @@
 interface ProcessEnv {
-  REACT_APP_API_HOST: string;
+  REACT_APP_API_BASE_URL: string;
 }

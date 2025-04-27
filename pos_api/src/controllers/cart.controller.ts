@@ -8,7 +8,7 @@ const getByTableId = async (req: Request, res: Response, next: NextFunction) => 
     const tableId = req.params.tableId;
     console.log(tableId);
     try {
-        const cart = await repository.find({ where: {tableId: parseInt(tableId)}, relations: ['productSizes.product','productSizes.size', 'promotion'] });
+        const cart = await repository.find({ where: {tableId: parseInt(tableId)}, relations: ['productSize.product','productSize.size', 'promotion'] });
         cart ? res.status(200).json(cart) : res.sendStatus(410);
     } catch (error) {
         console.error(error);

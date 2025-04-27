@@ -22,6 +22,7 @@ const login = async (req: Request, res: Response) => {
           };
 
         await bcrypt.compare(password, user?.password, function(err:Error, result:any) {
+            console.log('jhgfcgvhbjn',process.env.JWT_SECRET )
             if(result == true) {
                 jwt.sign(payload, 
                     process.env.JWT_SECRET,

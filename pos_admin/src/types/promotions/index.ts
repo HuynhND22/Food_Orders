@@ -1,6 +1,6 @@
 export type FieldType = {
     name: string;
-    limit: number;
+    quota: number;
     price: number;
     discount: number;
     startDate: string;

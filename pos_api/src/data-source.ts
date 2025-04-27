@@ -1,4 +1,7 @@
-require('dotenv').config();
+// require('dotenv').config();
+import * as dotenv from "dotenv";
+dotenv.config();
+console.log("DB_HOST:", process.env.DB_URL);
 import 'reflect-metadata';
 
 import { DataSource } from 'typeorm';
@@ -20,22 +23,27 @@ import { Status } from './entities/status.entity';
 import { Table } from './entities/table.entity';
 import { Ward } from './entities/ward.entity';
 import { ProductSize } from './entities/productSize.entity';
-import { ResetPassword } from './entities/resetPasswor.entity';
+import { ResetPassword } from './entities/resetPassword.entity';
 import { ActivateUser } from './entities/activateUser.entity';
-import {BankInfomation} from './entities//bankInfomation.entity'
+import {BankInformation} from './entities//bankInfomation.entity'
+import { BankHistory } from "./entities/bankHistory.entity";
 
-import { checkCartsUnique } from './migrations/triggers/checkCartsUnique';
-import { join } from 'path';
+
+// import { checkCartsUnique } from './migrations/triggers/checkCartsUnique';
+// import { join } from 'path';
 
 export const AppDataSource = new DataSource({
-  type: 'mssql',
+  type: 'postgres',
   host: process.env.DB_HOST || 'localhost',
+  // url: process.env.DB_URL, // Lấy URL từ biến môi trường
+  ssl: false, // Sử dụng SSL
   port: Number(process.env.DB_PORT),
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_DATABASE,
-   requestTimeout: 60000,
-  // entities: ['entities/**/*.entity{.ts,.js}', 'entities/**/*.schema{.ts,.js}'],
+  //  requestTimeout: 60000,
+  // entities: ['entities/*.entity{.ts,.js}'],
+  migrations: ["src/migrations/**/*.ts"],
   entities: [
     Cart,
     Status, 
@@ -56,17 +64,15 @@ export const AppDataSource = new DataSource({
     OrderDetail, 
     ResetPassword, 
     ActivateUser,
-    BankInfomation
+    BankInformation,
+    BankHistory
   ],
   // migrations: [
   //   // join(__dirname, '**', '*.\.{ts,js}')
   //   // "src/migrations/**/*.ts"
   //   'dist/**/*.entity.ts'
   // ],
-  // migrations: [
-  //   checkCartsUnique
-  // ],
-  synchronize: true,
+  synchronize: false,
   logging: false,
   extra: {
     trustServerCertificate: true,

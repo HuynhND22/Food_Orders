@@ -7,5 +7,5 @@ function makeDeviceId(t:any) {
   }
   
 export function getDeviceId() {
-    return makeDeviceId(45);
+    return makeDeviceId(43);
   }

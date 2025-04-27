@@ -6,7 +6,7 @@ export default function Header() {
     <header className="rounded-t-lg w-[100%] fixed top-1 p-2 z-10 bg-[#ffba00]">
       <div className=" w-[100%] flex justify-center ">
         <Image
-          src="http://localhost:9999/logo/logo.svg"
+          src="/images/logo/logo-transparent.png"
           alt="logo order food"
           style={{ width: '50%', height: 'auto' }}
           width={200}

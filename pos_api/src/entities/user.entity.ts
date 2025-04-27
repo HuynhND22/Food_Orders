@@ -1,88 +1,81 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn, VirtualColumn } from 'typeorm';
-import { IsIn, IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
+import { BaseEntity, BeforeInsert, BeforeUpdate, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { IsIn, IsNotEmpty, validateOrReject } from 'class-validator';
 import { Status } from './status.entity';
 import { Ward } from './ward.entity';
 import { Order } from './order.entity';
-import { ResetPassword } from './resetPasswor.entity';
+import { ResetPassword } from './resetPassword.entity';
 import { ActivateUser } from './activateUser.entity';
 
-
-@Entity({ name: 'Users' })
+@Entity({ name: 'users' }) // Dùng snake_case cho tên bảng
 export class User extends BaseEntity {
-  @PrimaryGeneratedColumn({ primaryKeyConstraintName: 'userId' })
+  @PrimaryGeneratedColumn({ name: 'user_id' }) // Dùng snake_case cho tên cột
   userId: number;
-  // @MaxLength(11)
-  @IsNotEmpty()
 
-  @Column({type: 'nvarchar', length: 255 })
+  @IsNotEmpty()
+  @Column({ type: 'varchar', length: 255, name: 'first_name' }) // Dùng snake_case cho tên cột
   firstName: string;
 
-  @Column({type: 'nvarchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, name: 'last_name' }) // Dùng snake_case cho tên cột
   lastName: string;
-  
-  @VirtualColumn({ query: () => `SELECT CONCAT(firstName, ' ', lastName) AS fullName FROM users;` })
-  fullName: string;
 
-  @Column({type: 'nvarchar', length: 11, default: 'Nam'})
+  @Column({ type: 'varchar', length: 11, default: 'Nam', name: 'gender' })
   @IsIn(['Nam', 'Nữ'])
   gender: string;
-  
-  @Column({unique: true ,type: 'nvarchar', length: 255 })
+
+  @Column({ unique: true, type: 'varchar', length: 255, name: 'email' })
   email: string;
 
-  @Column({type: 'varchar', length: 255, nullable:true })
+  @Column({ type: 'varchar', length: 255, nullable: true, name: 'password' })
   password: string;
-  
-  @Column({unique: true ,type: 'nvarchar', length: 15, nullable: true })
+
+  @Column({ unique: true, type: 'varchar', length: 15, nullable: true, name: 'phone_number' })
   phoneNumber?: string;
 
-  @Column({type: 'nvarchar', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true, name: 'address' })
   address: string;
 
-  @Column({type: 'int', nullable: true})
+  @Column({ type: 'int', nullable: true, name: 'ward_id' })
   wardId?: number;
-  // @MaxLength(11)
 
-  @Column({type: 'int'})
+  @Column({ type: 'int', name: 'status_id' })
   statusId: number;
-  // @MaxLength(11)
 
-  @Column({type: 'nvarchar', length: 20, default: ["N'Nhân viên'"]})
+  @Column({ type: 'varchar', length: 20, default: 'Nhân viên', name: 'role' })
   @IsIn(['Quản trị viên', 'Nhân viên'])
   role: string;
 
-  @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
-  createdAt: String;
+  @CreateDateColumn({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP", name: 'created_at' }) // Dùng snake_case
+  createdAt: string;
 
-  @UpdateDateColumn({ type: "datetime", default: () => "GETUTCDATE()", nullable:true, onUpdate: "GETUTCDATE()" })
-  updatedAt?: String;
+  @UpdateDateColumn({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP", nullable: true, onUpdate: "CURRENT_TIMESTAMP", name: 'updated_at' }) // Dùng snake_case
+  updatedAt?: string;
 
-  @DeleteDateColumn({nullable: true})
-  deletedAt?: String;
+  @DeleteDateColumn({ nullable: true, name: 'deleted_at' }) // Dùng snake_case
+  deletedAt?: string;
 
   @ManyToOne(() => Status, (s) => s.users)
   @JoinColumn({
-    name: "statusId",
+    name: 'status_id',
     referencedColumnName: 'statusId'
   })
   status: Status;
 
   @ManyToOne(() => Ward, (w) => w.users)
   @JoinColumn({
-    name: 'wardId',
+    name: 'ward_id',
   })
   ward: Ward;
 
   @OneToMany(() => Order, (o) => o.user)
   @JoinColumn({
-    name: 'userId'
+    name: 'user_id'
   })
   orders: Order[];
 
   @OneToOne(() => ResetPassword, (rp) => rp.user)
   resetPassword: ResetPassword;
 
-  @OneToOne(() => ActivateUser, (rp) => rp.user)
+  @OneToOne(() => ActivateUser, (au) => au.user)
   activateUser: ActivateUser;
 
   // HOOKS (AUTO VALIDATE)

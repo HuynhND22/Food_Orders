@@ -1,32 +1,77 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
-import { IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Check,
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  PrimaryColumn,
+} from 'typeorm';
+import { validateOrReject, IsNotEmpty } from 'class-validator';
+import { Table } from './table.entity';
+import { Promotion } from './promotion.entity';
+import { ProductSize } from './productSize.entity';
+import { Product } from './product.entity';
 import { Ward } from './ward.entity';
 import { Province } from './province.entity';
 
-@Entity({ name: 'Districts' })
-export class District extends BaseEntity {
-  @PrimaryColumn({ primaryKeyConstraintName: 'districtId' })
-  districtId: number;
-  @IsNotEmpty()
+@Entity({ name: 'categories' }) // Đổi sang snake_case cho PostgreSQL
+export class Category {
+  @PrimaryGeneratedColumn({ name: 'category_id' })
+  categoryId: number;
 
-  @Column({type: 'nvarchar', length: 255 })
+  @IsNotEmpty()
+  @Column({ name: 'name', unique: true, type: 'varchar', length: 255 })
   name: string;
 
-  @Column({type: 'int'})
-  provinceId: number;
+  @Column({ name: 'description', type: 'varchar', length: 255, nullable: true })
+  description?: string;
+
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp', default: () => 'now()' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp', nullable: true }) // `onUpdate` không cần thiết ở PostgreSQL
+  updatedAt?: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
+  deletedAt?: Date;
+
+  @OneToMany(() => Product, (p) => p.category)
+  products: Product[];
+
+  // HOOKS (AUTO VALIDATE)
+  @BeforeInsert()
+  @BeforeUpdate()
+  async validate() {
+    await validateOrReject(this);
+  }
+}
+
+@Entity({ name: 'districts' }) // Đổi tên bảng theo convention PostgreSQL
+export class District {
+  @PrimaryColumn({ name: 'district_id' }) // Giữ nguyên nếu không muốn tự động tăng
+  districtId: number;
+
+  @IsNotEmpty()
+  @Column({ name: 'name', type: 'varchar', length: 255 })
+  name: string;
+
+  @Column({ name: 'province_id'})
+  provinceId: string;
 
   @OneToMany(() => Ward, (w) => w.district)
-  @JoinColumn({
-    name: 'districtId'
-  })
   wards: Ward[];
 
-  @ManyToOne(()=> Province, (p) => p.districts)
-  @JoinColumn({
-    name: 'provinceId'
-  })
+  @ManyToOne(() => Province, (p) => p.districts)
+  @JoinColumn({ name: 'province_id' }) // Định danh khóa ngoại
   province: Province;
-  
+
   // HOOKS (AUTO VALIDATE)
   @BeforeInsert()
   @BeforeUpdate()

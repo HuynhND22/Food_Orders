@@ -1,19 +1,31 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Column, Entity, PrimaryColumn, DeleteDateColumn } from 'typeorm';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  PrimaryColumn,
+  DeleteDateColumn,
+  OneToMany,
+} from 'typeorm';
 import { validateOrReject } from 'class-validator';
+import { BankHistory } from './bankHistory.entity';
 
-@Entity({ name: 'BankInfomation' })
-export class BankInfomation extends BaseEntity {
-  @PrimaryColumn({ primaryKeyConstraintName: 'AccountNumber' })
+@Entity({ name: 'bank_information' }) // Đổi tên bảng theo chuẩn PostgreSQL
+export class BankInformation {
+  @PrimaryColumn({name:'account_number'})
   accountNumber: string;
-
-  @Column({type: 'nvarchar', length: 255 })
+  
+  @Column({ type: 'varchar', nullable:true, length: 255 })
   author: string;
-
-  @Column({type: 'nvarchar', length: 255 })
-  bankName: string;
-
-   @DeleteDateColumn({nullable: true})
-  deletedAt?: String;
+  
+  @Column({name:'activate', nullable:true})
+  activate: string;
+  
+  @OneToMany(() => BankHistory, (bh) => bh.bank, {
+    cascade: true,       // Cho phép tự động thao tác khi insert/update BankInformation
+    onDelete: 'CASCADE', // Khi xóa BankInformation thì xóa luôn bankHistory liên quan
+  })
+  bankHistory: BankHistory[];  
 
   // HOOKS (AUTO VALIDATE)
   @BeforeInsert()

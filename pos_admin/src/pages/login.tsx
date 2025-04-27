@@ -4,6 +4,7 @@ import { Form, Input, Button, Checkbox, message } from "antd";
 import {Navigate, useNavigate} from "react-router-dom";
 import axios from "axios";
 import getInfoStorage from '../helpers/getInfoStorege'
+import axiosClient from "../configs/axiosClient";
 const Login: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -17,10 +18,12 @@ const Login: React.FC = () => {
   const onFinish = async (values: any) => {
     setLoading(true);
     try {
-      const response:any = await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL}/auth/login`,
-        values
-      )
+      // const response:any = await axios.post(
+      //   `http://192.168.246.94:9999/auth/login`,
+      //   values
+      // )
+
+    const response:any = await axiosClient.post('/auth/login', values)
 
       if (response.data) {
         console.log(response.data);
@@ -41,6 +44,7 @@ const Login: React.FC = () => {
         message.error('Dữ liệu rỗng')
       }
     } catch (error:any) {
+      if(error.response)
       if (error.response.status === 400) {
         message.error("Email chưa chính xác");
       } else if (error.response.status === 401){

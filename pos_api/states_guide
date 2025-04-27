@@ -10,29 +10,29 @@ ex
 
 
 -- Insert trạng thái cho orders (10 - 19)
-INSERT INTO states (statusId, name) VALUES (10, N'Đợi thanh toán');
-INSERT INTO states (statusId, name) VALUES (11, N'Đang chuẩn bị');
-INSERT INTO states (statusId, name) VALUES (12, N'Đã xong');
-INSERT INTO states (statusId, name) VALUES (13, N'Đã huỷ');
+INSERT INTO states (status_id, name) VALUES (10, N'Đợi thanh toán');
+INSERT INTO states (status_id, name) VALUES (11, N'Đang chuẩn bị');
+INSERT INTO states (status_id, name) VALUES (12, N'Đã xong');
+INSERT INTO states (status_id, name) VALUES (13, N'Đã huỷ');
 
 -- Insert trạng thái cho users (20 - 29)
-INSERT INTO states (statusId, name) VALUES (20, N'Chưa kích hoạt');
-INSERT INTO states (statusId, name) VALUES (21, N'Đã kích hoạt');
+INSERT INTO states (status_id, name) VALUES (20, N'Chưa kích hoạt');
+INSERT INTO states (status_id, name) VALUES (21, N'Đã kích hoạt');
 
 -- Insert trạng thái cho table (30 - 39)
-INSERT INTO states (statusId, name) VALUES (30, N'Trống');
-INSERT INTO states (statusId, name) VALUES (31, N'Đầy');
+INSERT INTO states (status_id, name) VALUES (30, N'Trống');
+INSERT INTO states (status_id, name) VALUES (31, N'Đầy');
 
 -- Insert trạng thái cho product (40 - 49)
-INSERT INTO states (statusId, name) VALUES (40, N'Ẩn');
-INSERT INTO states (statusId, name) VALUES (41, N'Hiện');
-INSERT INTO states (statusId, name) VALUES (42, N'Khoá');
+INSERT INTO states (status_id, name) VALUES (40, N'Ẩn');
+INSERT INTO states (status_id, name) VALUES (41, N'Hiện');
+INSERT INTO states (status_id, name) VALUES (42, N'Khoá');
 
 -- Insert trạng thái cho promotion (50 - 59)
-INSERT INTO states (statusId, name) VALUES (50, N'Ngừng hoạt động');
-INSERT INTO states (statusId, name) VALUES (51, N'Đang hoạt động');
-INSERT INTO states (statusId, name) VALUES (52, N'Hết hạn');
+INSERT INTO states (status_id, name) VALUES (50, N'Ngừng hoạt động');
+INSERT INTO states (status_id, name) VALUES (51, N'Đang hoạt động');
+INSERT INTO states (status_id, name) VALUES (52, N'Hết hạn');
 
 -- Insert trạng thái cho suppliers (60 - 69)
-INSERT INTO states (statusId, name) VALUES (60, N'Chưa kích hoạt');
-INSERT INTO states (statusId, name) VALUES (61, N'Đã kích hoạt');
+INSERT INTO states (status_id, name) VALUES (60, N'Chưa kích hoạt');
+INSERT INTO states (status_id, name) VALUES (61, N'Đã kích hoạt');

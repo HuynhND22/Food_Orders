@@ -1,19 +1,19 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, Entity, JoinColumn, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
-import { IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
-import {District } from './district.entity';
+import { BaseEntity, BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { IsNotEmpty, validateOrReject } from 'class-validator';
+import { District } from './district.entity';
 
-@Entity({ name: 'Provinces' })
+@Entity({ name: 'provinces' }) // PostgreSQL uses snake_case
 export class Province extends BaseEntity {
-  @PrimaryColumn({ primaryKeyConstraintName: 'provinceId' })
+  @PrimaryGeneratedColumn({ name: 'province_id' }) // Changed to snake_case
   provinceId: number;
-  @IsNotEmpty()
 
-  @Column({type: 'nvarchar', length: 255 })
+  @IsNotEmpty()
+  @Column({ type: 'varchar', length: 255 }) // Changed to varchar for PostgreSQL
   name: string;
 
   @OneToMany(() => District, (d) => d.province)
   @JoinColumn({
-    name: 'provinceId'
+    name: 'province_id', // Changed to snake_case
   })
   districts: District[];
 

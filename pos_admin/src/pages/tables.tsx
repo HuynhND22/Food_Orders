@@ -250,7 +250,7 @@ const Tables: React.FC = () => {
 
       <Card title={
         <Space>
-          Danh sách danh mục
+          Danh sách bàn
           <Radio.Group value={deleted} onChange={(e) => setDeleted(e.target.value)}>
             <Radio.Button style={{color: '#1677FF'}} value="all">Đang hoạt động</Radio.Button>
             <Radio.Button style={{color: 'red'}} value="deleted">Đã xóa</Radio.Button>

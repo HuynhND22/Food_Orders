@@ -107,6 +107,7 @@ export default function Products({ }: Props) {
 
   const getProducts = async () => {
     try {
+      setProducts([]);
       const response = await axiosClient.get(`/products/${deleted}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -287,7 +288,7 @@ React.useEffect(() => {
 
   const handleRestore  = async (categoryId: number) => {
     try {
-      await axiosClient.post(`/products/restore/${categoryId}`, {
+      await axiosClient.post(`/products/restore/${categoryId}`, {}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },

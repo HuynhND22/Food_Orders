@@ -2,9 +2,8 @@ import {number, object, string} from 'yup';
 import { Request, Response, NextFunction } from "express";
 
 const bankSchema = object().shape({
-    accountNumber: string().required('Account number must be required'),
-    author: string().required('Author must be required'),
-    bankName: string().required('Bank name must be required')
+    username: string().required('Username must be required'),
+    password: string().required('password must be required'),
   });
 
 const validateBank = async (req: Request, res: Response, next: NextFunction) => {

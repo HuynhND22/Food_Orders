@@ -45,7 +45,7 @@ const getById = async (req: Request, res: Response, next: NextFunction) => {
 const getByTableId = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const order = await orderRepository.find({
-            where: { tableId: parseInt(req.params.id) },
+            where: { table: { tableId: parseInt(req.params.id) }},
             relations: ['orderDetails'],
             order: {
                 createdAt: 'DESC'
@@ -69,7 +69,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
             const result = await queryRunner.manager.save(Order, order);
 
             const carts = await queryRunner.manager.find(Cart, {where: {tableId: order.tableId}})
-            const orderDetails = [];
+            const orderDetails:any = [];
             for (const od of carts) {
                 if (od.productSizeId) {
                     let productSize = await queryRunner.manager.findOne(ProductSize, {where: { productSizeId: od.productSizeId}});
@@ -255,7 +255,7 @@ const updateStatus = async (req:Request, res:Response) =>{
 const getTotalPrice = async (req:Request, res:Response) => {
     try{
         const orderId = req.params.id;
-        const totalPrice = await orderRepository.manager.query(`EXEC CalculateTotalPrice @OrderId = ${orderId}`);
+        const totalPrice = await orderRepository.manager.query(`SELECT CalculateTotalPrice(${orderId})`);
         if(!totalPrice) return res.status(400)
         return res.json(totalPrice)
     } catch (error) {

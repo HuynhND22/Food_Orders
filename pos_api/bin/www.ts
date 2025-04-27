@@ -7,6 +7,7 @@
 import app from '../src/app';
 const debug = require('debug')('express-typescript:server');
 import http from 'http';
+import { initSocket } from '../src/config/socket/socketServer';
 
 /**
  * Get port from environment and store in Express.
@@ -20,6 +21,7 @@ app.set('port', port);
  */
 
 const server = http.createServer(app);
+initSocket(server)
 
 /**
  * Listen on provided port, on all network interfaces.

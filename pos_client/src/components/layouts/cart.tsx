@@ -62,13 +62,13 @@ export default function Cart() {
       const response: any = await axiosClient.get(`/carts/id/${table.tableId}`);
       console.log(response.data);  
       const filteredData = response.data.map((item: any) => {
-        const name = item.productSizes
-          ? item.productSizes.product.name + ' ' + item.productSizes.size.name
+        const name = item.productSize
+          ? item.productSize.product.name + ' ' + item.productSize.size.name
           : item.promotion.name;
         const price = item.promotion
           ? item.promotion.price * item.quantity
-          : item.productSizes.price *
-            (1 - item.productSizes.discount / 100) *
+          : item.productSize.price *
+            (1 - item.productSize.discount / 100) *
             item.quantity;
         return {
           cartId: item.cartId,

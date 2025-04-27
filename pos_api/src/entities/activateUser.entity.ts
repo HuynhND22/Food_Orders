@@ -1,25 +1,32 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
 import { User } from './user.entity';
 
-@Entity({ name: 'ActivateUsers' })
-export class ActivateUser extends BaseEntity {
-  @PrimaryColumn()
+@Entity({ name: 'activate_users' }) // PostgreSQL thường dùng snake_case cho tên bảng
+export class ActivateUser {
+  @PrimaryColumn({ name: 'email' })
   email: string;
-  @IsNotEmpty()
 
-  @Column({type: 'int'})
+  @IsNotEmpty()
+  @Column({ name: 'code', type: 'int' })
   code: number;
 
-  @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp', default: () => 'now()' })
   createdAt: Date;
 
   @OneToOne(() => User, (u) => u.activateUser)
-  @JoinColumn({
-    name: 'email',
-  })
+  @JoinColumn({ name: 'email' })
   user: User;
-  
+
   // HOOKS (AUTO VALIDATE)
   @BeforeInsert()
   @BeforeUpdate()

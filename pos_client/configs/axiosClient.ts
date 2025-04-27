@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosClient = axios.create({
-  baseURL: 'http://localhost:9999',
+  baseURL: 'http://phuctv.local:9999',
   timeout: 30000,
 });
 

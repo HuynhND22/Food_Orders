@@ -1,62 +1,70 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { IsIn, IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Check,
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  PrimaryColumn,
+} from 'typeorm';
+import { validateOrReject, IsNotEmpty, IsIn } from 'class-validator';
+import { Table } from './table.entity';
+import { Promotion } from './promotion.entity';
+import { ProductSize } from './productSize.entity';
 import { Product } from './product.entity';
+import { Ward } from './ward.entity';
+import { Province } from './province.entity';
 import { OrderDetail } from './orderDetail.entity';
 import { User } from './user.entity';
-import { Table } from './table.entity';
 import { Status } from './status.entity';
 
-@Entity({ name: 'Orders' })
-export class Order extends BaseEntity {
-  @PrimaryGeneratedColumn({ primaryKeyConstraintName: 'orderId' })
+@Entity({ name: 'orders' }) // PostgreSQL convention
+export class Order {
+  @PrimaryGeneratedColumn({ name: 'order_id' })
   orderId: number;
-  @IsNotEmpty()
 
-  @Column({type: 'int'})
-  tableId: number;
-
-  @Column({type: 'int', default: 10})
-  statusId: number;
-
-  @Column({type: 'int', nullable: true})
-  userId: number;
-
-  @Column({type: 'nvarchar', length: 255, default: ["N'Tiền mặt'"]})
+  @Column({ name: 'payment', type: 'varchar', length: 255, default: 'Tiền mặt' })
   @IsIn(['Tiền mặt', 'Ngân hàng'])
   payment: string;
 
-  @CreateDateColumn({type: 'datetime', name: 'createdAt', default: () => "GETUTCDATE()"})
-  createdAt: String;
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp', default: () => 'now()' })
+  createdAt: Date;
 
-  @UpdateDateColumn({ type: "datetime", default: () => "GETUTCDATE()", nullable:true, onUpdate: "GETUTCDATE()" })
-  updatedAt?: String;
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp', nullable: true })
+  updatedAt?: Date;
 
-  @DeleteDateColumn({nullable: true})
-  deletedAt?: String;
+  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
+  deletedAt?: Date;
 
   @OneToMany(() => OrderDetail, (od) => od.order)
   orderDetails: OrderDetail[];
 
-    @ManyToOne(() => User, (u) => u.orders)
-    @JoinColumn({
-      name: 'userId',
-      referencedColumnName: 'userId'
-    })
-    user: User;
+  @ManyToOne(() => User, (u) => u.orders)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
-    @ManyToOne(() => Table, (p) => p.orders)
-    @JoinColumn({
-      name: 'tableId',
-      referencedColumnName: 'tableId'
-    })
-    table: Table;
+  @Column({ name: 'table_id', nullable: true, type: 'int' })
+  tableId: number;
+  
+  @ManyToOne(() => Table, (t) => t.orders)
+  @JoinColumn({ name: 'table_id' })
+  table: Table;
 
-    @ManyToOne(() => Status, (s) => s.orders)
-    @JoinColumn({
-      name: "statusId",
-      referencedColumnName: 'statusId'
-    })
-    status: Status;
+  @Column({ name: 'status_id', nullable: true, type: 'int', default: 10 })
+  statusId: number;
+  
+  @ManyToOne(() => Status, (s) => s.orders)
+  @JoinColumn({ name: 'status_id' })
+  status: Status;
+
+  @OneToMany(() => OrderDetail, (od) => od.order)
+  orderDetail: OrderDetail;
 
   // HOOKS (AUTO VALIDATE)
   @BeforeInsert()

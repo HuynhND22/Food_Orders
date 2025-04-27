@@ -54,6 +54,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
         Object.assign(table, data);
         await repository.save(table);
 
+        console.log('vsdvssv', process.env.HOST_CLIENT)
+
         await QRCode.toFile(`./public/qrCode/tables/${simpleName}.png`, `${process.env.HOST_CLIENT}/tables/${data['uriCode']}`, {
             errorCorrectionLevel: 'H'
           }, function(err:any) {

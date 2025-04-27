@@ -1,28 +1,43 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { IsNotEmpty, validateOrReject } from 'class-validator';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Check,
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+} from 'typeorm';
+import { validateOrReject, IsNotEmpty } from 'class-validator';
+import { Table } from './table.entity';
+import { Promotion } from './promotion.entity';
+import { ProductSize } from './productSize.entity';
 import { Product } from './product.entity';
 
-@Entity({ name: 'Categories' })
-export class Category extends BaseEntity {
-  @PrimaryGeneratedColumn({ primaryKeyConstraintName: 'categoryId' })
+@Entity({ name: 'categories' }) // Đổi sang snake_case cho PostgreSQL
+export class Category {
+  @PrimaryGeneratedColumn({ name: 'category_id' })
   categoryId: number;
-  // @MaxLength(11)
-  @IsNotEmpty()
 
-  @Column({unique: true, type: 'nvarchar', length: 255 })
+  @IsNotEmpty()
+  @Column({ name: 'name', unique: true, type: 'varchar', length: 255 })
   name: string;
 
-  @Column({type: 'nvarchar', length: 255, nullable: true })
+  @Column({ name: 'description', type: 'varchar', length: 255, nullable: true })
   description?: string;
 
-  @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp', default: () => 'now()' })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: "datetime", default: () => "GETUTCDATE()", nullable:true, onUpdate: "GETUTCDATE()" })
-  updatedAt?: String;
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp', nullable: true }) // `onUpdate` không cần thiết ở PostgreSQL
+  updatedAt?: Date;
 
-  @DeleteDateColumn({nullable: true})
-  deletedAt?: String;
+  @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
+  deletedAt?: Date;
 
   @OneToMany(() => Product, (p) => p.category)
   products: Product[];

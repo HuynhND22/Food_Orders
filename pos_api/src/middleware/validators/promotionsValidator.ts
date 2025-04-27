@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from "express";
 
 const promotionSchema = object().shape({
     name: string().required('Name must be required'),
-    limit: number().required('Limit must be required').typeError('Limit must be a number'),
+    quota: number().required('Limit must be required').typeError('Limit must be a number'),
     price: number().required('Price must be required').typeError('Price must be a number'),
     startDate: date().required('Start date must be required').typeError('Start date must be a date'),
     endDate: date().required('End date must be required').typeError('End date must be a date'),

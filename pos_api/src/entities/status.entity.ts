@@ -1,29 +1,25 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
-import { IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
+import { BaseEntity, BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
+import { IsNotEmpty, validateOrReject } from 'class-validator';
 import { User } from './user.entity';
 import { Table } from './table.entity';
 import { Product } from './product.entity';
 import { Order } from './order.entity';
 import { Promotion } from './promotion.entity';
 
-@Entity({ name: 'States' })
+@Entity({ name: 'states' }) // Tên bảng chuyển sang snake_case
 export class Status extends BaseEntity {
-  // @PrimaryGeneratedColumn({ primaryKeyConstraintName: 'statusId' })
-  // statusId: number;
-  // @IsNotEmpty()
-
-  @PrimaryColumn({ type: 'int' })
+  @PrimaryColumn({ type: 'int', name: 'status_id' }) // Tên cột chuyển sang snake_case
   statusId: number;
 
-  @Column({type: 'nvarchar', length:255})
+  @Column({ type: 'varchar', length: 255 }) // Chuyển từ nvarchar sang varchar
   name: string;
 
   @OneToMany(() => User, (u) => u.status)
   users: User[];
 
-  @OneToMany(()=> Table, (t) => t.status)
+  @OneToMany(() => Table, (t) => t.status)
   tables: Table[];
-  
+
   @OneToMany(() => Product, (p) => p.status)
   products: Product[];
 

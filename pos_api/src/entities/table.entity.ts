@@ -1,56 +1,55 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
+import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { IsNotEmpty, validateOrReject } from 'class-validator';
 import { Status } from './status.entity';
 import { Cart } from './cart.entity';
 import { Order } from './order.entity';
 
-@Entity({ name: 'Tables' })
+@Entity({ name: 'tables' })
 export class Table extends BaseEntity {
-  @PrimaryGeneratedColumn({ primaryKeyConstraintName: 'tableId' })
+  @PrimaryGeneratedColumn({ name: 'table_id' })
   tableId: number;
-  @IsNotEmpty()
 
-  @Column({type: 'int', default: 2})
+  @IsNotEmpty()
+  @Column({ type: 'int', default: 2, name: 'seat' })
   seat: number;
-  
-  @Column({type: 'nvarchar', length:255, unique: true})
+
+  @Column({ type: 'varchar', length: 255, unique: true, name: 'name' })
   name: string;
 
-  @Column({type: 'int', nullable:true})
+  @Column({ type: 'int', nullable: true, name: 'status_id' })
   statusId?: number;
 
-  @Column({type: 'varchar', nullable:true})
+  @Column({ type: 'varchar', nullable: true, name: 'uri_code' })
   uriCode: string;
 
-  @Column({type: 'varchar', length:255})
+  @Column({ type: 'varchar', length: 255, name: 'qr_code' })
   qrCode: string;
 
-  @CreateDateColumn({type: 'datetime', default: () => "GETUTCDATE()"})
+  @CreateDateColumn({ type: 'timestamp', default: () => "CURRENT_TIMESTAMP", name: 'created_at' })
   createdAt: String;
 
-  @UpdateDateColumn({ type: "datetime", default: () => "GETUTCDATE()", nullable:true, onUpdate: "GETUTCDATE()" })
+  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP", nullable: true, onUpdate: "CURRENT_TIMESTAMP", name: 'updated_at' })
   updatedAt?: String;
 
-  @DeleteDateColumn({nullable: true})
+  @DeleteDateColumn({ nullable: true, name: 'deleted_at' })
   deletedAt?: String;
 
   @ManyToOne(() => Status, (s) => s.tables)
   @JoinColumn({
-    name: "statusId",
+    name: "status_id",
     referencedColumnName: 'statusId'
   })
   status: Status;
 
   @OneToMany(() => Order, (o) => o.table, { onDelete: 'CASCADE' })
   @JoinColumn({
-    name: 'tableId'
+    name: 'table_id'
   })
   orders: Order[];
 
-  @OneToMany(() => Cart, (s) => s.table,{ onDelete: 'CASCADE' })
+  @OneToMany(() => Cart, (s) => s.table, { onDelete: 'CASCADE' })
   carts: Cart[];
 
-  // HOOKS (AUTO VALIDATE)
   @BeforeInsert()
   @BeforeUpdate()
   async validate() {

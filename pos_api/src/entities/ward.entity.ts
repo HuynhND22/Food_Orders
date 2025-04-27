@@ -1,24 +1,24 @@
-import { BaseEntity, BeforeInsert, BeforeUpdate, Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
-import { IsNotEmpty, MaxLength, validateOrReject } from 'class-validator';
+import { BaseEntity, BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { IsNotEmpty, validateOrReject } from 'class-validator';
 import { District } from './district.entity';
 import { User } from './user.entity';
 import { Supplier } from './supplier.entity';
 
-@Entity({ name: 'Wards' })
+@Entity({ name: 'wards' }) // Dùng snake_case cho tên bảng
 export class Ward extends BaseEntity {
-  @PrimaryColumn({ primaryKeyConstraintName: 'wardId' })
+  @PrimaryColumn({ name: 'ward_id' }) // Dùng snake_case cho tên cột
   wardId: number;
-  @IsNotEmpty()
 
-  @Column({type: 'nvarchar', length: 255 })
+  @IsNotEmpty()
+  @Column({ type: 'varchar', length: 255 }) // Sử dụng varchar thay vì nvarchar
   name: string;
 
-  @Column({type: 'int'})
+  @Column({ name: 'district_id', type: 'int' })
   districtId: number;
 
   @ManyToOne(() => District, (d) => d.wards)
   @JoinColumn({
-    name: 'districtId'
+    name: 'district_id',
   })
   district: District;
 

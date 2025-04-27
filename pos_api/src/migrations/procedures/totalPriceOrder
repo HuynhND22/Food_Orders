@@ -15,3 +15,17 @@ END;
 
 
 EXEC CalculateTotalPrice @OrderId = 12
+
+CREATE OR REPLACE FUNCTION CalculateTotalPrice(order_id INT)
+RETURNS INT AS $$
+DECLARE
+    total_price INT;
+BEGIN
+    SELECT SUM((price * quantity * (100 - discount)) / 100)
+    INTO total_price
+    FROM "OrderDetails"
+    WHERE "orderId" = order_id;
+
+    RETURN total_price;
+END;
+$$ LANGUAGE plpgsql;

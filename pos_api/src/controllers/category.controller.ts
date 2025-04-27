@@ -11,7 +11,7 @@ const getAll = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const categories = await repository.find({order: {createdAt: 'DESC'}});
       if (categories.length === 0) {
-        res.status(204).send({
+        return res.status(204).send({
           error: 'No content',
         });
       }

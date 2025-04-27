@@ -10,5 +10,8 @@ const router = express.Router();
 router.post('/handler/:orderId', paymentController.paymentHandler);
 router.get('/banks/all', paymentController.getInfo);
 router.patch('/banks/update',isLogin, isAdmin, validateBank, paymentController.updateBank);
+router.post('/banks/login',isLogin, isAdmin, validateBank, paymentController.adminLoginBank);
+router.post('/banks/run-fetch', isLogin, isAdmin, paymentController.runFetch);
+router.post('/banks/logout', isLogin, isAdmin, paymentController.adminLogoutBank);
 
 export default router;
